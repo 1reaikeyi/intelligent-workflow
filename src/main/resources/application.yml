@@ -4,7 +4,8 @@ server:
     uri-encoding: UTF-8   #服务编码
 spring:
   profiles:
-    active: local
+    include: redis
+    active: dev
   application:
     name: aigc
   config:

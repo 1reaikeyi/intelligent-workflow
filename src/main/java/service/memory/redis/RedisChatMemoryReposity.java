@@ -1,18 +1,20 @@
-package service.memory;
+package service.memory.redis;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.lang.Assert;
-import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
-import jakarta.annotation.Resource;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import service.memory.MessageUtil;
+
 import java.util.List;
 import java.util.Set;
 @Service
+@Profile("redis")
 public class RedisChatMemoryReposity implements ChatMemoryRepository {
     private static final String DEFAULT_PREFIX = "chat:";
     private final String prefix;
@@ -39,7 +41,15 @@ public class RedisChatMemoryReposity implements ChatMemoryRepository {
 
     @Override
     public List<Message> findByConversationId(String conversationId) {
-        return List.of();
+        // 生成Redis键名用于存储会话消息
+        var redisKey = this.getKey(conversationId);
+        // 获取Redis列表操作对象
+        var listOps = this.stringRedisTemplate.boundListOps(redisKey);
+
+        // 从Redis列表中获取所有的数据
+        var messages = listOps.range(0, -1);
+        // 将Redis返回的字符串列表转换为Message对象列表
+        return CollStreamUtil.toList(messages, MessageUtil::toMessage);
     }
 
     @Override
@@ -50,8 +60,7 @@ public class RedisChatMemoryReposity implements ChatMemoryRepository {
         // 保存数据时，会传入全部的消息数据，包括之前的数据，所以需要先删除之前的数据，再添加新的数据
         this.deleteByConversationId(conversationId);
         // 将消息序列化并添加到Redis列表的右侧
-        messages.forEach(message -> listOps.rightPush(JSONUtil.toJsonStr(message)));
-//        messages.forEach(message -> listOps.rightPush(MessageUtil.toJson(message, conversationId)));
+        messages.forEach(message -> listOps.rightPush(MessageUtil.toJson(message, conversationId)));
     }
 
     @Override
