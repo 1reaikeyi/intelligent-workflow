@@ -1,0 +1,47 @@
+server:
+  port: 8080 #端口
+  tomcat:
+    uri-encoding: UTF-8   #服务编码
+spring:
+  profiles:
+    active: local
+  application:
+    name: aigc
+  config:
+    import:
+      - classpath:application-dev.yml
+      - classpath:session.yml
+
+  datasource:
+    driver-class-name: ${aigc.datasource.driver-class-name}
+    url: jdbc:mysql://${aigc.datasource.host}:${aigc.datasource.port}/${aigc.datasource.database}
+    username: ${aigc.datasource.username}
+    password: ${aigc.datasource.password}
+  data:
+    redis:
+      host: ${aigc.redis.host}
+      port: ${aigc.redis.port}
+      password: ${aigc.redis.password}
+      database: ${aigc.redis.database}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+tj:
+  ai:
+#系统提示词
+    prompt:
+      system:
+        chat:
+          # 系统提示词文件路径，用于定义AI助手的角色和技能
+          file: classpath:system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+#memory
+    memory:
+      #存储最大的聊天记录数
+      maxMessage: 20
+      type: redis
+
+
