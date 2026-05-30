@@ -14,22 +14,35 @@ aigc:
     password: ${MYSQL_PASSWORD}
     database: 1
 
+
 spring:
   ai:
+
     openai:
       base-url: https://api-inference.modelscope.cn
       api-key: ${PATH_ai_qwen_api}
       chat:
         options:
           model: Qwen/Qwen3-14B
+          # temperature: 0.7       # 温度参数，控制输出随机性
+          # max-tokens: 1024       # 最大输出token数
+          # top-p: 0.9             # 核采样参数
       embedding:
         options:
           model: Qwen/Qwen3-Embedding-4B
           dimensions: 1024
           encoding-format: float
-          # temperature: 0.7       # 温度参数，控制输出随机性
-          # max-tokens: 1024       # 最大输出token数
-          # top-p: 0.9             # 核采样参数
+  # Redis向量库配置（使用 redis-stack:7.4.7，端口63790）
+    vectorstore:
+      redis:
+        host: 192.168.80.128
+        port: 63790
+        password: ${MYSQL_PASSWORD}
+        database: 0
+        initialize-schema: true  # 初始化索引
+        index-name: spring-ai-index
+        prefix: "embedding:"
+
 
 mybatis-plus:
   configuration:

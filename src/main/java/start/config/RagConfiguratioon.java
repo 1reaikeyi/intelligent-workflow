@@ -7,42 +7,25 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.vectorstore.redis.RedisVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
 
 @Configuration
-public class AiConfiguratioon {
-    @Value("${tj.ai.memory.maxMessage:100}")
-    private int maxMessages;
+public class RagConfiguratioon {
 
     /**
-     * 日志记录器
+     * 配置 RAG 客户端配置
      */
     @Bean
-    public Advisor loggerAdvisor() {
-        return new SimpleLoggerAdvisor();
-    }
-    @Bean
-    public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository) {
-        // 基于 chatMemoryRepository 对象构建 chatMemory 对象
-        return MessageWindowChatMemory.builder()
-                .chatMemoryRepository(chatMemoryRepository)
-                .maxMessages(maxMessages) // 最多保存 20 条对话, 如果超出的话，会自动删除最旧的对话
-                .build();
-    }
-    @Bean
-    public Advisor messageWindowAdvisor(ChatMemory chatMemory) {
-        return MessageChatMemoryAdvisor.builder(chatMemory).build();
-    }
-
-    /**
-     * 配置 ChatClient
-     */
-    @Bean
-    public ChatClient chatClient(OpenAiChatModel model,
+    public ChatClient ragClient(OpenAiChatModel model,
                                  @Qualifier("loggerAdvisor") Advisor loggerAdvisor,
                                  @Qualifier("messageWindowAdvisor") Advisor messageWindowAdvisor) {  // 日志记录器
         return ChatClient.builder(model)
@@ -50,5 +33,25 @@ public class AiConfiguratioon {
                 .build();
     }
 
+    /**
+     * 配置 Redis 连接池
+     * 用于 RAG（检索增强生成）功能的向量数据库
+     *
+     * @return JedisPooled 实例
+     */
+    @Value("${spring.ai.vectorstore.redis.password}")
+    private String auth;
+    @Bean
+    public JedisPooled jedisPooled() {
+        return new JedisPooled("redis://:"+auth+"@192.168.80.128:63790");
+    }
 
+    @Bean
+    public VectorStore vectorStore(JedisPooled jedisPooled, EmbeddingModel embeddingModel) {
+        return RedisVectorStore.builder(jedisPooled, embeddingModel)
+                .indexName("spring-ai-index")
+                .prefix("embedding:")
+                .initializeSchema(true)
+                .build();
+    }
 }
