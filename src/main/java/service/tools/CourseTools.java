@@ -1,42 +1,30 @@
-//package service.tools;
-//
-//import cn.hutool.core.map.MapUtil;
-//import cn.hutool.core.util.StrUtil;
-//import com.tianji.aigc.config.ToolResultHolder;
-//import com.tianji.aigc.constants.Constant;
-//import com.tianji.aigc.tools.result.CourseInfo;
-//import com.tianji.api.client.course.CourseClient;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.ai.chat.model.ToolContext;
-//import org.springframework.ai.tool.annotation.Tool;
-//import org.springframework.ai.tool.annotation.ToolParam;
-//import org.springframework.stereotype.Component;
-//
-//import java.util.Optional;
-//
-///**
-// * 课程工具
-// */
-//@Component
-//@RequiredArgsConstructor
-//public class CourseTools {
-//
-//    private final CourseClient courseClient;
-//    private static final String FIELD_NAME_FORMAT = "{}_{}";  // 提取格式字符串常量
-//
-//    @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
-//    public CourseInfo queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId, ToolContext toolContext) {
-//        return Optional.ofNullable(courseId)
-//                .map(id -> this.courseClient.baseInfo(id, true))
-//                .map(CourseInfo::of)
-//                .map(courseInfo -> {
-//                    // 将结果存储到容器中
-//                    var requestId = MapUtil.get(toolContext.getContext(), Constant.REQUEST_ID, String.class);
-//                    var field = StrUtil.format(FIELD_NAME_FORMAT, StrUtil.lowerFirst(CourseInfo.class.getSimpleName()), courseId);
-//                    ToolResultHolder.put(requestId, field, courseInfo);
-//                    return courseInfo;
-//                })
-//                .orElse(null);
-//    }
-//
-//}
+package service.tools;
+
+import common.constants.Constant;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import service.tools.result.Course;
+import service.tools.result.CourseService;
+
+import java.util.Optional;
+
+@Service
+public class CourseTools {
+    private static final Logger log = LoggerFactory.getLogger(CourseTools.class);
+    @Autowired
+    private  CourseService courseService;
+
+    @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
+    public CourseInfo queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId) {
+        return Optional.ofNullable(courseId)
+                .map(id -> courseService.getById(id))
+                .map(CourseInfo::of)
+                .orElse(null);
+    }
+}

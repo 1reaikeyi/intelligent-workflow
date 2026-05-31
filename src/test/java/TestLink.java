@@ -1,6 +1,12 @@
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import redis.clients.jedis.JedisPooled;
+import service.tools.result.CourseService;
+import start.AIGCApplication;
 
+// 使用 Spring Boot 测试注解，启动 Spring 容器
+@SpringBootTest(classes = AIGCApplication.class)
 public class TestLink {
     @Test
     public void test() {
@@ -28,6 +34,14 @@ public class TestLink {
             System.err.println("❌ Redis Stack 连接失败: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Autowired
+    private CourseService courseService;
+
+    @Test
+    public void test2() {
+        System.out.println("courseService.list() = " + courseService.list());
     }
 
 }

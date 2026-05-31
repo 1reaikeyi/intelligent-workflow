@@ -21,7 +21,7 @@ import java.net.UnknownHostException;
 // 扫描bean组件
 @ComponentScan(basePackages = {"common","service", "start"})
 // 扫描mapper接口
-@MapperScan("mapper")
+@MapperScan(basePackages = {"mapper"})
 // 开启事务管理
 @EnableTransactionManagement
 // 开启配置属性

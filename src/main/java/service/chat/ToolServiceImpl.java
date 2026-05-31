@@ -4,11 +4,8 @@ import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,22 +13,17 @@ import reactor.core.publisher.Flux;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
-import java.util.Vector;
-
 @Service
-public class RagServiceImpl implements RagService{
-    //src/main/java/start/config/RagConfiguratioon.java::ragClient
-    @Resource(name = "ragClient")
-    private ChatClient ragClient;
+public class ToolServiceImpl implements ToolService{
+    //src/main/java/start/config/ToolConfiguratioon.java::toolClient
+    @Resource(name = "toolClient")
+    private ChatClient toolClient;
     @Autowired
     private SystemPromptConfig systemPromptConfig;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ChatMemory chatMemory;
-
-    @Autowired
-    private VectorStore vectorStore;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
     /**
@@ -47,22 +39,17 @@ public class RagServiceImpl implements RagService{
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
-
+        //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
-        // 创建RAG增强
-        var qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
-                .searchRequest(SearchRequest.builder().similarityThreshold(0.6d).topK(6).build())
-                .build();
-
-        return ragClient.prompt()
+        return toolClient.prompt()
                 .user(question)
                 .advisors(advisorSpec -> advisorSpec
-                            // 设置RAG增强
-                            .advisors(qaAdvisor)
-                            //会话记忆
-                            .param(ChatMemory.CONVERSATION_ID, conversationId))
+                        //会话记忆
+                        .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .system(promptSystemSpec -> promptSystemSpec
+                        //系统role
                         .text(systemPromptConfig.getChatSystemMessage().get())
+                        //param = 参数
                         .param("now", LocalDateTime.now())
                 )
                 .stream()
@@ -73,16 +60,16 @@ public class RagServiceImpl implements RagService{
                 .doFirst(() -> outputHash.put(sessionId, "true"))  // 将布尔值转换为字符串存入 Redis
                 .doOnError(throwable -> outputHash.delete(sessionId))
                 .doOnComplete(() -> outputHash.delete(sessionId))
-                //(2)stop时仍然输出
+                //(2)stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doOnCancel(() -> {
-                    // 当输出被取消时，保存输出的内容到历史记录中
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
                 //控制是否继续
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
+
                 .map(chatResponse -> {
                     String response = chatResponse.getResult().getOutput().getText();
-                    // 追加到输出内容中
+                    // (3)追加到输出内容中
                     outputBuilder.append(response);
                     ChatEventVO chatEventVO = ChatEventVO.builder()
                             .eventData(response)

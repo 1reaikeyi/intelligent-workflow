@@ -24,12 +24,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/rag")
 public class EmbeddingController {
+    @Resource(name = "ragServiceImpl")
+    private RagService ragService;
     @Autowired
     private VectorStore vectorStore;
     @Autowired
     private EmbeddingModel embeddingModel;
-    @Resource
-    private RagService ragService;
+
     @PostMapping("/embedding")
     public String saveVectorStore(@RequestParam("messages") List<String> messages) {
         //构建文档
@@ -40,11 +41,11 @@ public class EmbeddingController {
         this.vectorStore.add(documents);
         log.info("保存到向量数据库中，消息数据：{}", messages);
         log.info("保存到向量数据库成功, 数量：{}", messages.size());
-        return "数量:"+messages.size();
+        return "保存到向量数据库成功, 数量:"+messages.size();
     }
     @GetMapping
-    public EmbeddingResponse embed(@RequestParam("message") String message) {
-        return this.embeddingModel.embedForResponse(List.of(message));
+    public EmbeddingResponse embedding(@RequestParam("message") String message) {
+        return embeddingModel.embedForResponse(List.of(message));
     }
 
     @DeleteMapping
