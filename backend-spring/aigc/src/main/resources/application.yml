@@ -10,7 +10,7 @@ spring:
     name: aigc
   config:
     import:
-      - classpath:application-dev.yml
+      - classpath:application-dev.properties
       - classpath:session.yml
 
   datasource:

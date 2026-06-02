@@ -41,9 +41,11 @@ public class RagConfiguratioon {
      */
     @Value("${spring.ai.vectorstore.redis.password}")
     private String auth;
+    @Value("${spring.ai.vectorstore.redis.port:16379}")
+    private int redisPort;
     @Bean
     public JedisPooled jedisPooled() {
-        return new JedisPooled("redis://:"+auth+"@192.168.80.128:63790");
+        return new JedisPooled("redis://:"+auth+"@192.168.80.128:"+redisPort);
     }
 
     @Bean

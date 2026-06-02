@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.tianji</groupId>
-        <artifactId>tjxt</artifactId>
+        <artifactId>backend-spring</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -132,7 +132,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>start.AIGCApplication</mainClass>
+                    <mainClass>start.YuApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
