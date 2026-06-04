@@ -34,9 +34,9 @@ public class EmbeddingController {
     @PostMapping("/embedding")
     public String saveVectorStore(@RequestParam("messages") List<String> messages) {
         //构建文档
-        List<Document> documents = CollStreamUtil.toList(messages, message -> Document.builder()
-                .text(message)
-                .build());
+        List<Document> documents = messages.stream()
+                .map(message -> Document.builder().text(message).build())
+                .toList();
         //存储到向量数据库中
         this.vectorStore.add(documents);
         log.info("保存到向量数据库中，消息数据：{}", messages);

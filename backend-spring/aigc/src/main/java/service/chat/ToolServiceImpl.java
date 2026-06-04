@@ -1,5 +1,7 @@
 package service.chat;
 
+import cn.hutool.core.util.IdUtil;
+import common.constants.Constant;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
@@ -10,9 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import service.tools.ToolResultHolder;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+
 @Service
 public class ToolServiceImpl implements ToolService{
     //src/main/java/start/config/ToolConfiguratioon.java::toolClient
@@ -26,6 +31,10 @@ public class ToolServiceImpl implements ToolService{
     private ChatMemory chatMemory;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
+    // 输出结束的标记
+    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder()
+                                .eventType(ChatEventTypeEnum.STOP.getValue())
+                                .build();
     /**
      * chat
      *
@@ -39,6 +48,8 @@ public class ToolServiceImpl implements ToolService{
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
+        // 生成请求id
+        var requestId = IdUtil.fastSimpleUUID();
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
         return toolClient.prompt()
@@ -52,6 +63,7 @@ public class ToolServiceImpl implements ToolService{
                         //param = 参数
                         .param("now", LocalDateTime.now())
                 )
+                .toolContext(Map.of(Constant.REQUEST_ID, requestId)) //通过工具上下文传递参数
                 .stream()
                 .chatResponse()
                 // 第一次输出内容时执行
@@ -76,9 +88,21 @@ public class ToolServiceImpl implements ToolService{
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
                     return chatEventVO;})
-                .concatWith(Flux.just(ChatEventVO.builder().
-                        eventType(ChatEventTypeEnum.STOP.getValue())
-                        .build()));
+
+                .concatWith(Flux.defer(() -> {
+                    // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
+                    var map = ToolResultHolder.get(requestId);
+                    if (!map.isEmpty()) {
+                        ToolResultHolder.remove(requestId); // 清除参数列表
+                        // 响应给前端的参数数据
+                        var chatEventVO = ChatEventVO.builder()
+                                .eventData(map)
+                                .eventType(ChatEventTypeEnum.PARAM.getValue())
+                                .build();
+                        return Flux.just(chatEventVO, STOP_EVENT);
+                    }
+                    return Flux.just(STOP_EVENT);
+                }));
     }
     /**
      * 保存停止输出的记录
