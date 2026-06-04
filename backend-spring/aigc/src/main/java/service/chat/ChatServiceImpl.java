@@ -6,11 +6,11 @@ import model.vo.ChatEventVO;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import service.ChatSessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
@@ -26,6 +26,8 @@ public class ChatServiceImpl implements ChatService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ChatMemory chatMemory;
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
     /**
@@ -41,6 +43,7 @@ public class ChatServiceImpl implements ChatService {
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
+        chatSessionService.updateTitle(sessionId,question);
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
         return chatClient.prompt()

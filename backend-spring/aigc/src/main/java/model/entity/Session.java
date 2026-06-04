@@ -28,7 +28,6 @@ public class Session implements Serializable {
      */
     @TableField("session_id")
     private String sessionId;
-
     /**
      * 用户id
      */

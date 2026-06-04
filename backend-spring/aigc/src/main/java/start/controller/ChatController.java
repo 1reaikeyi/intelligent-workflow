@@ -3,6 +3,10 @@ package start.controller;
 import jakarta.annotation.Resource;
 import model.dto.ChatDTO;
 import model.vo.ChatEventVO;
+import org.springframework.ai.openai.OpenAiAudioSpeechModel;
+import org.springframework.ai.openai.OpenAiAudioSpeechOptions;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -30,4 +34,5 @@ public class ChatController {
     public void stop(@RequestParam String sessionId) {
         chatService.stop(sessionId);
     }
+
 }

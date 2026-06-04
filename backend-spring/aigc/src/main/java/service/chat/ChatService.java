@@ -14,7 +14,6 @@ public interface ChatService {
         return sessionId;
     }
 
-
     /**
      * chat
      *

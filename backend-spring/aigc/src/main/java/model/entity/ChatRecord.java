@@ -28,7 +28,11 @@ public class ChatRecord implements Serializable {
      */
     @TableField("conversation_id")
     private String conversationId;
-
+    /**
+     * 标题
+     */
+    @TableField("title")
+    private String title;
     /**
      * 对话数据
      */

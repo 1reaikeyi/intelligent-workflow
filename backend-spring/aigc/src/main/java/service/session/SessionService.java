@@ -1,12 +1,8 @@
-package service;
+package service.session;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import model.entity.Session;
-import model.vo.MessageVO;
 import model.vo.SessionVO;
-import org.springframework.web.bind.annotation.GetMapping;
-
-import java.util.List;
 
 public interface SessionService extends IService<Session> {
     /**
@@ -16,11 +12,7 @@ public interface SessionService extends IService<Session> {
      * @return 会话信息
      */
     SessionVO createSession(Long num);
-    /**
-     * 根据会话id查询消息列表
-     *
-     * @param sessionId 会话id
-     * @return 消息列表
-     */
-    List<MessageVO> queryBySessionId(String sessionId);
+
+
+
 }

@@ -26,6 +26,8 @@ import java.net.UnknownHostException;
 @EnableTransactionManagement
 // 开启配置属性
 @EnableConfigurationProperties
+//异步
+@EnableAsync
 public class AIGCApplication {
     public static void main(String[] args) throws UnknownHostException {
         SpringApplication.run(AIGCApplication.class, args);
