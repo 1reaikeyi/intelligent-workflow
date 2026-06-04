@@ -1,6 +1,7 @@
 package service.chat;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import common.constants.Constant;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import service.ChatSessionService;
 import service.tools.ToolResultHolder;
 import start.config.SystemPromptConfig;
 
@@ -29,6 +31,8 @@ public class ToolServiceImpl implements ToolService{
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ChatMemory chatMemory;
+    @Autowired
+    private ChatSessionService chatSessionService;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
     // 输出结束的标记
@@ -44,6 +48,7 @@ public class ToolServiceImpl implements ToolService{
      */
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
+        chatSessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
@@ -80,6 +85,14 @@ public class ToolServiceImpl implements ToolService{
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
 
                 .map(chatResponse -> {
+                    // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
+                    // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
+                    // 从而解决，在历史聊天记录中没有外参数的问题
+                    var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
+                    if (StrUtil.equals(Constant.STOP, finishReason)) {
+                        var messageId = chatResponse.getMetadata().getId();
+                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
+                    }
                     String response = chatResponse.getResult().getOutput().getText();
                     // (3)追加到输出内容中
                     outputBuilder.append(response);

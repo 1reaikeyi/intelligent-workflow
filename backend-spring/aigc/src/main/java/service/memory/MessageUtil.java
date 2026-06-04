@@ -7,6 +7,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import common.constants.Constant;
 import org.springframework.ai.chat.messages.*;
+import service.tools.ToolResultHolder;
 
 /**
  * 消息转换工具类，提供消息对象与JSON字符串之间的转换功能，主要用于Redis存储格式转换
@@ -27,6 +28,15 @@ public class MessageUtil {
         myMessage.setSessionId(sessionId);
         if (message instanceof AssistantMessage assistantMessage) {
             myMessage.setToolCalls(assistantMessage.getToolCalls());
+            // 通过 messageId 获取 requestId，再通过 requestId 获取参数列表，如果有，就存储起来
+            // 最后，删除 messageId 对应的数据
+            var messageId = Convert.toStr(assistantMessage.getMetadata().get(Constant.ID));
+            var requestId = Convert.toStr(ToolResultHolder.get(messageId, Constant.REQUEST_ID));
+            var params = ToolResultHolder.get(requestId);
+            if (ObjectUtil.isNotEmpty(params)) {
+                myMessage.setParams(params);
+            }
+            ToolResultHolder.remove(messageId);
         }
 
         if (message instanceof ToolResponseMessage toolResponseMessage) {
@@ -58,12 +68,19 @@ public class MessageUtil {
                         .build();
             }
             case ASSISTANT -> {
-                return AssistantMessage.builder()
-                        .content(myMessage.getTextContent())
-                        .properties(myMessage.getMetadata())
-                        .toolCalls(myMessage.getToolCalls())
-                        .build();
+                return new AssistantMessageUtil(myMessage.getTextContent(),
+                        myMessage.getMetadata(),
+                        myMessage.getToolCalls(),
+                        myMessage.getMedia(),
+                        myMessage.getParams());
             }
+//            case ASSISTANT -> {
+//                return AssistantMessage.builder()
+//                        .content(myMessage.getTextContent())
+//                        .properties(myMessage.getMetadata())
+//                        .toolCalls(myMessage.getToolCalls())
+//                        .build();
+//            }
             case TOOL -> {
                 return ToolResponseMessage.builder()
                         .responses(myMessage.getToolResponses())
@@ -74,26 +91,7 @@ public class MessageUtil {
 
         throw new RuntimeException("Message data conversion failed.");
     }
-    /**
-     * 将Message对象转换为Redis存储格式的JSON字符串
-     *
-     * @param message 需要转换的原始消息对象
-     * @return 符合Redis存储规范的JSON字符串
-     */
-    public static String toJson(Message message) {
-        var myMessage = BeanUtil.toBean(message, MessageModel.class);
-        // 设置消息内容
-        myMessage.setTextContent(message.getText());
-        if (message instanceof AssistantMessage assistantMessage) {
-            myMessage.setToolCalls(assistantMessage.getToolCalls());
-        }
 
-        if (message instanceof ToolResponseMessage toolResponseMessage) {
-            myMessage.setToolResponses(toolResponseMessage.getResponses());
-        }
-
-        return JSONUtil.toJsonStr(myMessage);
-    }
 
 
 }

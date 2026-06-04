@@ -1,5 +1,6 @@
 package service.chat;
 
+import cn.hutool.core.util.IdUtil;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
@@ -39,11 +40,11 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
+        chatSessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
-        chatSessionService.updateTitle(sessionId,question);
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
         return chatClient.prompt()

@@ -18,5 +18,6 @@ public class MessageModel {
     private String textContent;
     private List<ToolResponseMessage.ToolResponse> toolResponses = List.of();
     private String sessionId;
+    private Map<String, Object> params = Map.of();
 
 }

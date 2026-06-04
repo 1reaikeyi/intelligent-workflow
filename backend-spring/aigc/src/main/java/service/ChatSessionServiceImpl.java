@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import service.chat.ChatService;
+import service.memory.AssistantMessageUtil;
 import service.memory.mysql.ChatRecordService;
 
 import java.time.LocalDateTime;
@@ -44,10 +45,20 @@ public class ChatSessionServiceImpl implements ChatSessionService{
                 // 过滤掉非用户消息和助手消息
                 .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
                 // 转换为MessageVO对象
-                .map(message -> MessageVO.builder()
-                        .content(message.getText())
-                        .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
-                        .build())
+                // 转换为MessageVO对象
+                .map(message -> {
+                    if (message instanceof AssistantMessageUtil) {
+                        return MessageVO.builder()
+                                .content(message.getText())
+                                .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+                                .params(((AssistantMessageUtil) message).getParams())
+                                .build();
+                    }
+                    return MessageVO.builder()
+                            .content(message.getText())
+                            .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
+                            .build();
+                })
                 .toList();
     }
     /**
@@ -66,7 +77,8 @@ public class ChatSessionServiceImpl implements ChatSessionService{
             return;
         }
         ChatRecord chatRecord = list.get(0);
-        chatRecord.setTitle(title.substring(0,100));
+        // 安全截取标题，避免长度不足时抛出异常
+        chatRecord.setTitle(title.length() > 100 ? title.substring(0, 100) : title);
         chatRecordService.updateById(chatRecord);
     }
 
