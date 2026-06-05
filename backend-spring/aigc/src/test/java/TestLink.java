@@ -5,8 +5,9 @@ import redis.clients.jedis.JedisPooled;
 import service.tools.result.CourseService;
 import start.AIGCApplication;
 
-// 使用 Spring Boot 测试注解，启动 Spring 容器
-@SpringBootTest(classes = AIGCApplication.class)
+import java.time.LocalDateTime;
+
+
 public class TestLink {
     @Test
     public void test() {
@@ -36,12 +37,11 @@ public class TestLink {
         }
     }
 
-    @Autowired
-    private CourseService courseService;
 
     @Test
     public void test2() {
-        System.out.println("courseService.list() = " + courseService.list());
+
+//        System.out.println("courseService.list() = " + courseService.list());
     }
 
 }

@@ -1,6 +1,5 @@
 package service.chat;
 
-import cn.hutool.core.util.IdUtil;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
@@ -11,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.ChatSessionService;
+import service.SessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
@@ -28,7 +27,7 @@ public class ChatServiceImpl implements ChatService {
     @Autowired
     private ChatMemory chatMemory;
     @Autowired
-    private ChatSessionService chatSessionService;
+    private SessionService sessionService;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
     /**
@@ -40,13 +39,14 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
-        chatSessionService.updateTitle(sessionId,question);
+        sessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
+
         return chatClient.prompt()
                 .user(question)
                 .advisors(advisorSpec -> advisorSpec

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.ChatSessionService;
+import service.SessionService;
 import service.tools.ToolResultHolder;
 import start.config.SystemPromptConfig;
 
@@ -32,7 +32,7 @@ public class ToolServiceImpl implements ToolService{
     @Autowired
     private ChatMemory chatMemory;
     @Autowired
-    private ChatSessionService chatSessionService;
+    private SessionService sessionService;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
     // 输出结束的标记
@@ -48,7 +48,7 @@ public class ToolServiceImpl implements ToolService{
      */
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
-        chatSessionService.updateTitle(sessionId,question);
+        sessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId

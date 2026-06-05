@@ -1,6 +1,5 @@
 package service.chat;
 
-import cn.hutool.core.util.IdUtil;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
@@ -14,11 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.ChatSessionService;
+import service.SessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
-import java.util.Vector;
 
 @Service
 public class RagServiceImpl implements RagService{
@@ -32,7 +30,7 @@ public class RagServiceImpl implements RagService{
     @Autowired
     private ChatMemory chatMemory;
     @Autowired
-    private ChatSessionService chatSessionService;
+    private SessionService sessionService;
     @Autowired
     private VectorStore vectorStore;
 
@@ -46,7 +44,7 @@ public class RagServiceImpl implements RagService{
      */
     @Override
     public Flux<ChatEventVO> chat(String question, String sessionId) {
-        chatSessionService.updateTitle(sessionId,question);
+        sessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId

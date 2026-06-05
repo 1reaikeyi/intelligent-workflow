@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatTittleVO {
+public class ChatSessionVO {
 
     /**
      * 会话id

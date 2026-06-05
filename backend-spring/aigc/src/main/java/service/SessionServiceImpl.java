@@ -1,16 +1,24 @@
 package service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.stream.StreamUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import common.properties.SessionProperties;
 import lombok.extern.slf4j.Slf4j;
+import mapper.SessionMapper;
 import model.entity.ChatRecord;
+import model.entity.Session;
 import model.enums.MessageTypeEnum;
-import model.vo.ChatTittleVO;
+import model.vo.ChatSessionVO;
 import model.vo.MessageVO;
+import model.vo.SessionVO;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import service.chat.ChatService;
@@ -18,27 +26,53 @@ import service.memory.AssistantMessageUtil;
 import service.memory.mysql.ChatRecordService;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
-public class ChatSessionServiceImpl implements ChatSessionService{
+public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> implements SessionService {
+    @Autowired
+    private SessionProperties sessionProperties;
     @Autowired
     private ChatRecordService chatRecordService;
     @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
     private ChatMemory chatMemory;
+    @Override
+    public SessionVO createSession(Long num) {
+        var sessionVO = BeanUtil.toBean(sessionProperties, SessionVO.class);
+        // 随机获取examples
+        sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(),Integer.parseInt(num.toString())));
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
+        String formattedDate = now.format(formatter);
+        // 随机生成sessionId
+        sessionVO.setSessionId(formattedDate);
+
+        // 构建持久化对象，并持久化
+        var chatSession = Session.builder()
+                .sessionId(sessionVO.getSessionId())
+                .title(sessionVO.getTitle())
+                .build();
+        super.save(chatSession);
+
+        return sessionVO;
+    }
     /**
      * 根据会话id查询消息列表
      *
      * @return 消息列表
      */
     @Override
-    public List<MessageVO> queryBySessionId(String chatId) {
-        // 根据会话ID获取对话ID
-        String conversationId = ChatService.getConversationId(chatId);
-        // 从Redis中获取历史消息
+    public List<MessageVO> queryBySessionId(String sessionId) {
+//        // 根据会话ID获取对话ID
+        String conversationId = ChatService.getConversationId(sessionId);
+//        // 从Redis中获取历史消息
         List<Message> messageList = chatMemory.get(conversationId);
         // 过滤并转换消息列表
         return StreamUtil.of(messageList)
@@ -70,26 +104,25 @@ public class ChatSessionServiceImpl implements ChatSessionService{
     @Async
     @Override
     public void updateTitle(String sessionId, String title) {
-        LambdaQueryWrapper<ChatRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ChatRecord::getConversationId, sessionId);
-        List<ChatRecord> list = chatRecordService.list(queryWrapper);
+        LambdaQueryWrapper<Session> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Session::getSessionId, sessionId);
+        List<Session> list = this.list(queryWrapper);
         if (list.isEmpty()) {
             return;
         }
-        ChatRecord chatRecord = list.get(0);
+        Session session= list.get(0);
         // 安全截取标题，避免长度不足时抛出异常
-        chatRecord.setTitle(title.length() > 100 ? title.substring(0, 100) : title);
-        chatRecordService.updateById(chatRecord);
+        session.setTitle(title.length() > 100 ? title.substring(0, 100) : title);
+        this.updateById(session);
     }
-
     /**
      * 查询历史会话列表
      */
     @Override
-    public Map<String, List<ChatTittleVO>> queryHistorySession() {
+    public Map<String, List<ChatSessionVO>> queryHistorySession() {
         // 查询历史会话，限制返回条数
-        var list = chatRecordService.lambdaQuery()
-                .orderByDesc(ChatRecord::getUpdateTime)
+        var list = this.lambdaQuery()
+                .orderByDesc(Session::getUpdateTime)
                 .last("LIMIT 30")
                 .list();
         if (list.isEmpty()) {
@@ -99,9 +132,8 @@ public class ChatSessionServiceImpl implements ChatSessionService{
 
         // 转换为 ChatSessionVO 列表
         var chatSessionVOList = list.stream()
-                .map(chat ->ChatTittleVO.builder()
-                        .sessionId(chat.getConversationId())
-                        .title(chat.getTitle())
+                .map(chat -> ChatSessionVO.builder()
+                        .sessionId(chat.getSessionId())
                         .updateTime(chat.getUpdateTime())
                         .build())
                 .toList();
@@ -138,8 +170,12 @@ public class ChatSessionServiceImpl implements ChatSessionService{
     @Override
     public void deleteHistorySession(String sessionId) {
         //1删除mysql
-        chatRecordService.removeById(sessionId);
+        this.remove(new LambdaQueryWrapper<Session>()
+                .eq(Session::getSessionId, sessionId));
+        chatRecordService.remove(new LambdaQueryWrapper<ChatRecord>()
+                .eq(ChatRecord::getSessionId, sessionId));
         //2删除缓存
-        chatMemory.clear(sessionId);
+        stringRedisTemplate.delete(sessionId);
     }
+
 }

@@ -25,15 +25,15 @@ public class MysqlChatMemoryReposity implements ChatMemoryRepository {
     @Override
     public List<String> findConversationIds() {
         var chatRecordList = chatRecordService.lambdaQuery()
-                .select(ChatRecord::getConversationId)
+                .select(ChatRecord::getSessionId)
                 .list();
-        return CollStreamUtil.toList(chatRecordList, ChatRecord::getConversationId);
+        return CollStreamUtil.toList(chatRecordList, ChatRecord::getSessionId);
     }
 
     @Override
     public List<Message> findByConversationId(String conversationId) {
         var chatRecordList = chatRecordService.lambdaQuery()
-                .eq(ChatRecord::getConversationId, conversationId)
+                .eq(ChatRecord::getSessionId, conversationId)
                 .orderByAsc(ChatRecord::getCreateTime)
                 .list();
         return CollStreamUtil.toList(chatRecordList, chatRecord -> MessageUtil.toMessage(chatRecord.getData()));
@@ -46,15 +46,15 @@ public class MysqlChatMemoryReposity implements ChatMemoryRepository {
         // 批量保存数据到数据库
         var chatRecordList = CollStreamUtil.toList(messages, message -> ChatRecord.builder()
                 .data(MessageUtil.toJson(message, conversationId))
-                .conversationId(conversationId)
+                .sessionId(conversationId)
                 .build());
         this.chatRecordService.saveBatch(chatRecordList);
     }
 
     @Override
-    public void deleteByConversationId(String conversationId) {
+    public void deleteByConversationId(String sessionId) {
         var queryWrapper = Wrappers.<ChatRecord>lambdaQuery()
-                .eq(ChatRecord::getConversationId, conversationId);
+                .eq(ChatRecord::getSessionId, sessionId);
         this.chatRecordService.remove(queryWrapper);
     }
 
