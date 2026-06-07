@@ -23,7 +23,7 @@
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
+                <version>1.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -94,28 +94,6 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-vector-store-redis</artifactId>
         </dependency>
-
-<!--        集群-->
-<!--        &lt;!&ndash;discovery&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash;config&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash;loadbalancer&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-loadbalancer</artifactId>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash; spring-ai-alibaba&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba.cloud.ai</groupId>-->
-<!--            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -132,7 +110,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>start.YuApplication</mainClass>
+                    <mainClass>start.start.FlowApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

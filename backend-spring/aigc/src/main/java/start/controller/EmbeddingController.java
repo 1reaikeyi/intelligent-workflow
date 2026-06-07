@@ -1,6 +1,7 @@
 package start.controller;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import common.result.Result;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,39 +33,15 @@ public class EmbeddingController {
     private EmbeddingModel embeddingModel;
 
     @PostMapping("/embedding")
-    public String saveVectorStore(@RequestParam("messages") List<String> messages) {
-        //构建文档
-        List<Document> documents = messages.stream()
-                .map(message -> Document.builder().text(message).build())
-                .toList();
-        //存储到向量数据库中
-        this.vectorStore.add(documents);
-        log.info("保存到向量数据库中，消息数据：{}", messages);
-        log.info("保存到向量数据库成功, 数量：{}", messages.size());
-        return "保存到向量数据库成功, 数量:"+messages.size();
-    }
-    @GetMapping
-    public EmbeddingResponse embedding(@RequestParam("message") String message) {
-        return embeddingModel.embedForResponse(List.of(message));
+    public Result saveVectorStore(@RequestParam("messages") List<String> messages) {
+        return Result.success("保存到向量数据库数量:"+messages.size());
     }
 
-    @DeleteMapping
-    public void deleteVectorStore(@RequestParam("ids") List<String> ids) {
-        // 删除向量数据库中的数据
-        this.vectorStore.delete(ids);
-    }
-
-    @GetMapping("/search")
-    public List<Document> search(@RequestParam("message") String message) {
-        return vectorStore.similaritySearch(SearchRequest.builder().query(message).topK(5).build());
-    }
-
-    @GetMapping("/search/all")
-    public List<Document> searchAll() {
-        // 搜索全部数据
-        return vectorStore.similaritySearch(SearchRequest.builder().query("").topK(999).build());
-    }
-
+    /**
+     * rag
+     * @param chatDTO
+     * @return
+     */
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatEventVO> chat(@RequestBody ChatDTO chatDTO) {
         return ragService.chat(chatDTO.getQuestion(), chatDTO.getSessionId());
@@ -76,5 +53,28 @@ public class EmbeddingController {
     public void stop(@RequestParam String sessionId) {
         ragService.stop(sessionId);
     }
+    //返回 ：返回向量表示（通常是浮点数数组）
+    @GetMapping
+    public EmbeddingResponse embedding(@RequestParam("message") String message) {
+        return embeddingModel.embedForResponse(List.of(message));
+    }
+    //将查询文本向量化后，在向量数据库中查找最相似的文档,2条
+    @GetMapping("/search")
+    public List<Document> search(@RequestParam("message") String message) {
+        return vectorStore.similaritySearch(SearchRequest.builder().query(message).topK(2).build());
+    }
+    //将查询文本向量化后，在向量数据库中查找最相似的文档,最大topk
+    @GetMapping("/search/all")
+    public List<Document> searchAll() {
+        // 搜索全部数据
+        return vectorStore.similaritySearch(SearchRequest.builder().query("").topK(999).build());
+    }
+    //删除
+    @DeleteMapping
+    public void deleteVectorStore(@RequestParam("ids") List<String> ids) {
+        // 删除向量数据库中的数据
+        this.vectorStore.delete(ids);
+    }
+
 
 }

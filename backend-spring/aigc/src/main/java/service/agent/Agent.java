@@ -58,7 +58,7 @@ public interface Agent {
     default String systemMessage() {
         return "";
     }
-
+//------------------------------------------
 
     /**
      * 获取工具列表，默认返回空数组。子类需根据需求覆盖此方法。

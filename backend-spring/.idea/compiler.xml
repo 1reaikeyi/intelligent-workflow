@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="aigc" />
+        <module name="graph" />
         <module name="audio" />
       </profile>
     </annotationProcessing>
@@ -16,6 +17,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="aigc" options="-parameters" />
       <module name="audio" options="-parameters" />
+      <module name="graph" options="-parameters" />
     </option>
   </component>
 </project>

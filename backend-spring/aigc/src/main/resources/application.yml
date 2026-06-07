@@ -4,7 +4,7 @@ server:
     uri-encoding: UTF-8   #服务编码
 spring:
   profiles:
-    include: mysql
+    include: redis
     active: dev
   application:
     name: aigc
@@ -39,6 +39,15 @@ tj:
           file: classpath:system-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
+        route-agent:
+          # 路由代理系统消息文件路径，用于意图识别
+          file: classpath:route-agent-system-message.txt
+        recommend-agent:
+          # 推荐智能体系统消息文件路径，用于课程推荐
+          file: classpath:recommend-agent-system-message.txt
+        knowledge-agent:
+          # 知识讲解智能体系统消息文件路径
+          file: classpath:knowledge-agent-system-message.txt
 #memory
     memory:
       #存储最大的聊天记录数

@@ -49,6 +49,4 @@ public class ChatConfiguratioon {
                 .defaultAdvisors(loggerAdvisor, messageWindowAdvisor) //添加 Advisor 功能增强
                 .build();
     }
-
-
 }

@@ -14,6 +14,9 @@ public class SystemMessageProperties {
     @Data
     public static class SystemMessage {
         private Chat chat; // 系统提示语，用于课程推荐、购买业务
+        private Chat routeAgent; // 路由智能体系统提示词
+        private Chat recommendAgent; // 推荐智能体系统提示词
+        private Chat knowledgeAgent; //知识讲解智能体
         @Data
         public static class Chat {
             private String dataId;

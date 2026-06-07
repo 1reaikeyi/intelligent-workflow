@@ -18,7 +18,7 @@ backend-spring/
 │   │   │   ├── dto/          # 数据传输对象（ChatDTO）
 │   │   │   ├── entity/       # 数据库实体（ChatRecord, Session）
 │   │   │   ├── enums/        # 枚举类型（AgentTypeEnum, ChatEventTypeEnum, MessageTypeEnum）
-│   │   │   └── vo/           # 视图对象（ChatEventVO, ChatTittleVO, MessageVO, SessionVO, TemplateVO）
+│   │   │   └── vo/           # 视图对象（ChatEventVO, ChatSessionVO, MessageVO, SessionVO, TemplateVO）
 │   │   ├── service/          # 服务层
 │   │   │   ├── agent/        # Agent 抽象层（AbstractAgent, Agent）
 │   │   │   ├── chat/         # 对话服务
@@ -27,11 +27,14 @@ backend-spring/
 │   │   │   │   └── ToolService/ToolServiceImpl      # 工具调用服务
 │   │   │   ├── memory/       # 会话记忆管理
 │   │   │   │   ├── mysql/    # MySQL 记忆存储（ChatRecordService, MysqlChatMemoryReposity）
-│   │   │   │   └── redis/    # Redis 记忆存储（RedisChatMemoryReposity）
-│   │   │   ├── session/      # 会话管理服务（SessionService, SessionServiceImpl）
-│   │   │   ├── tools/        # 工具服务（CourseInfo, CourseTools, CourseService）
-│   │   │   ├── ChatSessionService.java       # 会话业务接口
-│   │   │   └── ChatSessionServiceImpl.java   # 会话业务实现
+│   │   │   │   ├── redis/    # Redis 记忆存储（RedisChatMemoryReposity）
+│   │   │   │   └── AssistantMessageUtil, MessageModel, MessageUtil  # 消息工具类
+│   │   │   ├── rag/          # RAG 服务（CreateVector）
+│   │   │   ├── tools/        # 工具服务
+│   │   │   │   ├── result/   # 课程工具实现（Course, CourseService, CourseServiceImpl）
+│   │   │   │   └── CourseInfo, CourseTools, ToolResultHolder  # 工具定义
+│   │   │   ├── SessionService.java       # 会话管理服务接口
+│   │   │   └── SessionServiceImpl.java   # 会话管理服务实现
 │   │   └── start/            # 启动配置
 │   │       ├── config/       # 配置类（ChatConfiguration, RagConfiguration, SystemPromptConfig, ToolConfiguration）
 │   │       ├── controller/   # REST API 控制器
@@ -166,7 +169,7 @@ backend-spring/
 - `content`：消息内容
 - `timestamp`：时间戳
 
-**ChatTittleVO（会话标题视图）**：
+**ChatSessionVO（会话视图）**：
 - `sessionId`：会话 ID
 - `title`：会话标题
 - `updateTime`：更新时间

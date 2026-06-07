@@ -72,7 +72,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> impl
     public List<MessageVO> queryBySessionId(String sessionId) {
 //        // 根据会话ID获取对话ID
         String conversationId = ChatService.getConversationId(sessionId);
-//        // 从Redis中获取历史消息
+//        // 从chatmemory中获取历史消息
         List<Message> messageList = chatMemory.get(conversationId);
         // 过滤并转换消息列表
         return StreamUtil.of(messageList)
