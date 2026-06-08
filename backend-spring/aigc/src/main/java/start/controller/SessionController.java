@@ -1,7 +1,7 @@
 package start.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import common.result.Result;
+import start.result.Result;
 import model.entity.Session;
 import model.vo.ChatSessionVO;
 import model.vo.MessageVO;
@@ -9,7 +9,6 @@ import model.vo.SessionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import service.SessionService;
-import service.memory.mysql.ChatRecordService;
 
 import java.util.List;
 import java.util.Map;

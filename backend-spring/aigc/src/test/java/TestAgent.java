@@ -2,9 +2,8 @@ import cn.hutool.core.lang.Assert;
 import model.enums.AgentTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import service.agent.RouteAgent;
+import service.flow.RouteAgent;
 import start.AIGCApplication;
 
 @SpringBootTest(classes = AIGCApplication.class)

@@ -16,5 +16,15 @@
       <option name="name" value="Central Repository" />
       <option name="url" value="https://maven.aliyun.com/repository/public" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="aliyun-public" />
+      <option name="name" value="Aliyun Maven Public Repository" />
+      <option name="url" value="https://maven.aliyun.com/repository/public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="spring-public" />
+      <option name="name" value="Spring Public Repository" />
+      <option name="url" value="https://repo.spring.io/public" />
+    </remote-repository>
   </component>
 </project>

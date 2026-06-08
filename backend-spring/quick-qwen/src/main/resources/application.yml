@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: qwen
+  
+  ai:
+    openai:
+      base-url: https://api-inference.modelscope.cn
+      api-key: ${PATH_ai_qwen_api}
+      chat:
+        options:
+          model: Qwen/Qwen3-14B
+      embedding:
+        options:
+          model: Qwen/Qwen3-Embedding-4B
+          dimensions: 1024
+          encoding-format: float
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/use_take_out
+    username: root
+    password: ${MYSQL_PASSWORD}
+  data:
+    redis:
+      host: 192.168.80.128
+      port: 6379
+      password: ${MYSQL_PASSWORD}
+      database: 0
+    vectorstore:
+      redis:
+        index: spring_ai_index
+        initialize-schema: true
+        prefix: "doc:"
+
+
+  
+
+
+logging:
+  charset:
+    console: UTF-8
+  level:
+    # Spring AI
+    org.springframework.ai: debug
+    # HTTP
+    org.springframework.web.client: debug

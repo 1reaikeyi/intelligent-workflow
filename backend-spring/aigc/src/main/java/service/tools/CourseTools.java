@@ -1,7 +1,6 @@
 package service.tools;
 
-import common.constants.Constant;
-import lombok.RequiredArgsConstructor;
+import start.constants.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ToolContext;
@@ -9,7 +8,6 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import service.tools.result.Course;
 import service.tools.result.CourseService;
 
 import java.util.Optional;

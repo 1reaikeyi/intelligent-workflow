@@ -1,4 +1,4 @@
-package service.agent;
+package service.flow;
 
 import lombok.RequiredArgsConstructor;
 import model.enums.AgentTypeEnum;

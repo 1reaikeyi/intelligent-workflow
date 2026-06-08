@@ -6,6 +6,9 @@
       <list>
         <option value="$PROJECT_DIR$/aigc/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/qwen/pom.xml" />
+        <option value="$PROJECT_DIR$/quick_qwen/pom.xml" />
+        <option value="$PROJECT_DIR$/quick-qwen/pom.xml" />
       </list>
     </option>
   </component>

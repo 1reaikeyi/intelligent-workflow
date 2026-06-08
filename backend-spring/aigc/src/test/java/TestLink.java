@@ -1,15 +1,7 @@
-import cn.hutool.core.lang.Assert;
-import jakarta.annotation.Resource;
-import model.enums.AgentTypeEnum;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import redis.clients.jedis.JedisPooled;
-import service.agent.RouteAgent;
-import service.tools.result.CourseService;
 import start.AIGCApplication;
-
-import java.time.LocalDateTime;
 
 // 使用 Spring Boot 测试注解，启动 Spring 容器
 @SpringBootTest(classes = AIGCApplication.class)

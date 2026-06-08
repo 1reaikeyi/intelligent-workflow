@@ -1,4 +1,4 @@
-package common.result;
+package start.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

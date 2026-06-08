@@ -2,6 +2,7 @@ package node;
 
 
 import com.alibaba.cloud.ai.graph.CompiledGraph;
+import com.alibaba.cloud.ai.graph.GraphRepresentation;
 import com.alibaba.cloud.ai.graph.KeyStrategy;
 import com.alibaba.cloud.ai.graph.KeyStrategyFactory;
 import com.alibaba.cloud.ai.graph.StateGraph;
@@ -54,6 +55,14 @@ public class NodeLink {
         } catch (GraphStateException e) {
             throw new RuntimeException(e);
         }
+        // UML 图生成与打印
+        // 使用 PlantUML 格式生成图的可视化表示
+        GraphRepresentation representation = graph.getGraph(GraphRepresentation.Type.PLANTUML, "English Flow");
+        // 打印 UML 图内容到控制台
+        System.out.println("\n=== English Flow UML Diagram ===");
+        System.out.println(representation.content());
+        System.out.println("==================================\n");
+        
         return compiledGraph;
     }
 }

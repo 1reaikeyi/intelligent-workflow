@@ -7,8 +7,8 @@ import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.agent.AbstractAgent;
-import service.agent.Agent;
+import service.flow.AbstractAgent;
+import service.flow.Agent;
 
 @Service
 @RequiredArgsConstructor

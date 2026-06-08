@@ -8,8 +8,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="aigc" />
-        <module name="graph" />
         <module name="audio" />
+        <module name="quick-qwen" />
+        <module name="graph" />
       </profile>
     </annotationProcessing>
   </component>
@@ -18,6 +19,7 @@
       <module name="aigc" options="-parameters" />
       <module name="audio" options="-parameters" />
       <module name="graph" options="-parameters" />
+      <module name="quick-qwen" options="-parameters" />
     </option>
   </component>
 </project>

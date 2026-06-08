@@ -1,4 +1,4 @@
-package service.agent;
+package service.flow;
 
 import model.enums.AgentTypeEnum;
 import model.vo.ChatEventVO;

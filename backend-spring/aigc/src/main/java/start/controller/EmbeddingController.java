@@ -1,13 +1,10 @@
 package start.controller;
 
-import cn.hutool.core.collection.CollStreamUtil;
-import common.result.Result;
+import start.result.Result;
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.dto.ChatDTO;
 import model.vo.ChatEventVO;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
