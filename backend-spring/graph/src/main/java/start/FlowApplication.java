@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 @Slf4j
 //主程序入口
 @SpringBootApplication
-@ComponentScan(basePackages = {"start","config","node"})
+@ComponentScan(basePackages = {"start","config","node","audio"})
 public class FlowApplication {
 //    sk-a9bf52d2beea4c028213126b2ef492fc
     public static void main(String[] args) throws UnknownHostException {
