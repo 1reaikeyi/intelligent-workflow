@@ -1,8 +1,3 @@
-package chat.service.RAG;
-
-import org.springframework.stereotype.Component;
-
-
 public class VectorDistanceUtils {
 
     // 防止实例化

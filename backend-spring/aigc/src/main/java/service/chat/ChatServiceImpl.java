@@ -82,6 +82,7 @@ public class ChatServiceImpl implements ChatService {
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
                     return chatEventVO;})
+
                 .concatWith(Flux.just(ChatEventVO.builder().
                         eventType(ChatEventTypeEnum.STOP.getValue())
                         .build()));

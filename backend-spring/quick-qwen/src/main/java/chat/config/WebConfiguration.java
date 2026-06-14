@@ -13,6 +13,6 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册敏感词拦截器，拦截AI相关接口
-        registry.addInterceptor(sensitiveWordInterceptor).addPathPatterns("/memory", "/rag", "/tool");
+        registry.addInterceptor(sensitiveWordInterceptor).addPathPatterns("/rag", "/tool");
     }
 }

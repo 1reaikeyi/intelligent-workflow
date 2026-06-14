@@ -1,5 +1,5 @@
 <script setup>
-import toolVue from '@/view/tool.vue'
+import toolVue from '@/views/tool.vue'
 </script>
 
 <template>

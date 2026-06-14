@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import static chat.service.RAG.Pdf.FIXED_PDF_NAME;
+import static org.springframework.ai.chat.client.advisor.api.Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER;
 import static org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor.FILTER_EXPRESSION;
 
 @RestController
@@ -21,8 +22,8 @@ public class PdfChat {
     public Flux<String> ragChat(@RequestParam("message") String message,String memoryId) {
         return pdfClient.prompt()
                 .user(message)
-                .advisors(a -> a.param(String.valueOf(MessageChatMemoryAdvisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER), memoryId))
-                .advisors(a -> a.param(FILTER_EXPRESSION, "file_name == '" + FIXED_PDF_NAME + "'"))
+                .advisors(a -> a.param(String.valueOf(DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER), memoryId))
+                .advisors(a -> a.param(FILTER_EXPRESSION, FIXED_PDF_NAME))
                 .stream()
                 .content();
 

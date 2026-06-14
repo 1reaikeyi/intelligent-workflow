@@ -9,6 +9,7 @@ import zhCN from 'element-plus/dist/locale/zh-cn.js'
 createApp(App).mount('#app')
 const app = createApp(App)
 
+import router from './router'
 app.use(ElementPlus,{locale:zhCN})
-
+app.use(router)
 app.mount('#app')

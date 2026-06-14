@@ -1,5 +1,4 @@
 import chat.QwenApplication;
-import chat.service.RAG.VectorDistanceUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;

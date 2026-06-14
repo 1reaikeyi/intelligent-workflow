@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <header class="app-header">
       <div class="header-left">
-        <div class="app-logo">Qwen</div>
+        <div class="app-logo">qwen</div>
       </div>
       <div class="header-actions">
         <button
@@ -118,7 +118,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted, watch } from 'vue';
-import { createMemoryChat } from '../api/memory.js';
+import { createRagChat } from '../api/rag.js';
 // 引入所需的 Element Plus 图标
 import { Plus, Moon, Sunny, User, VideoPause, Promotion } from '@element-plus/icons-vue';
 
@@ -132,7 +132,7 @@ const textareaRef = ref(null);
 const memoryId = ref(Date.now().toString());
 
 // ---- 外部请求层 ----
-const chat = createMemoryChat();
+const chat = createRagChat();
 let typingTimer = null;
 
 // ---- 工具函数 ----

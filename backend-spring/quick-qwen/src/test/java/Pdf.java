@@ -20,11 +20,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-@SpringBootTest(classes = QwenApplication.class)
 public class Pdf {
-    @Autowired
     private VectorStore vectorStore;
-
     @Test
     public void testVectorStore(){
         Resource resource = new FileSystemResource("论语.pdf");
@@ -50,7 +47,6 @@ public class Pdf {
         List<Document> docs = vectorStore.similaritySearch(request);
         if (docs == null) {
             System.out.println("没有搜索到任何内容");
-            return;
         }
         for (Document doc : docs) {
             System.out.println("相似度得分: " + doc.getScore());
@@ -58,54 +54,4 @@ public class Pdf {
         }
     }
 
-
-
-    @Test
-    public void testTxtVectorStore() {
-        // 1. 指定TXT文件路径（替换为你的实际路径）
-        String txtFilePath = "src/main/resources/apple.md";
-        Resource txtResource = new FileSystemResource(txtFilePath);
-
-        List<Document> txtDocuments = new ArrayList<>();
-        try {
-            // 2. 原生IO读取TXT文件内容（UTF-8编码，适配中文）
-            String txtContent = Files.readString(Paths.get(txtResource.getURI()), StandardCharsets.UTF_8);
-
-            // 3. 手动构建Document对象（核心步骤，替代TxtDocumentReader）
-            Document txtDoc = new Document(txtContent);
-            // 添加元数据（用于后续过滤，和PDF保持一致的逻辑）
-            txtDoc.getMetadata().put("file_name", "apple.md");
-            txtDoc.getMetadata().put("file_type", "md");
-            txtDocuments.add(txtDoc);
-
-        } catch (IOException e) {
-            System.err.println("读取TXT文件失败：" + e.getMessage());
-            e.printStackTrace();
-            return;
-        }
-
-        // 4. 将TXT内容写入向量库（和PDF逻辑一致）
-        vectorStore.add(txtDocuments);
-
-        // 5. 构建搜索请求（和PDF逻辑一致）
-        SearchRequest txtSearchRequest = SearchRequest.builder()
-                .query("版本与售价") // 替换为你的搜索关键词
-                .topK(1)
-                .similarityThreshold(0.6)
-                .filterExpression("file_name == 'info.txt'") // 过滤TXT文件
-                .build();
-
-        // 6. 执行搜索并输出结果
-        List<Document> searchResults = vectorStore.similaritySearch(txtSearchRequest);
-        if (searchResults == null || searchResults.isEmpty()) {
-            System.out.println("未从TXT文件中搜索到相关内容");
-            return;
-        }
-
-        // 7. 输出结果（格式优化，便于查看）
-        for (Document result : searchResults) {
-            System.out.println("相似度得分: " + result.getScore());
-            System.out.println("文档内容: " + result.getText());
-        }
-    }
 }

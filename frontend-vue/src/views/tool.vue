@@ -3,7 +3,7 @@
     <!-- 顶部导航栏 -->
     <header class="app-header">
       <div class="header-left">
-        <div class="app-logo">Qwen</div>
+        <div class="app-logo">qwen</div>
       </div>
       <div class="header-actions">
         <button

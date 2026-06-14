@@ -37,6 +37,13 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.26</version>
         </dependency>
+        <!-- 中文转换 -->
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>opencc4j</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+
 
     </dependencies>
 

@@ -1,0 +1,355 @@
+Compiled from "DashScopeAudioTranscriptionModel.java"
+public class com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel implements com.alibaba.cloud.ai.dashscope.audio.transcription.AudioTranscriptionModel {
+  public com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel(com.alibaba.cloud.ai.dashscope.api.DashScopeAudioTranscriptionApi, com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: aload_2
+       3: getstatic     #1                  // Field org/springframework/ai/retry/RetryUtils.DEFAULT_RETRY_TEMPLATE:Lorg/springframework/retry/support/RetryTemplate;
+       6: invokespecial #7                  // Method "<init>":(Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;Lorg/springframework/retry/support/RetryTemplate;)V
+       9: return
+
+  public com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel(com.alibaba.cloud.ai.dashscope.api.DashScopeAudioTranscriptionApi, com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions, org.springframework.retry.support.RetryTemplate);
+    Code:
+       0: aload_0
+       1: invokespecial #13                 // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: ldc           #18                 // String api must not be null
+       8: invokestatic  #20                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+      11: checkcast     #26                 // class com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi
+      14: putfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      17: aload_0
+      18: aload_2
+      19: ldc           #32                 // String options must not be null
+      21: invokestatic  #20                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+      24: checkcast     #34                 // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions
+      27: putfield      #36                 // Field defaultOptions:Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+      30: aload_0
+      31: aload_3
+      32: ldc           #40                 // String retryTemplate must not be null
+      34: invokestatic  #20                 // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+      37: checkcast     #42                 // class org/springframework/retry/support/RetryTemplate
+      40: putfield      #44                 // Field retryTemplate:Lorg/springframework/retry/support/RetryTemplate;
+      43: aload_0
+      44: invokestatic  #47                 // Method com/fasterxml/jackson/databind/json/JsonMapper.builder:()Lcom/fasterxml/jackson/databind/json/JsonMapper$Builder;
+      47: iconst_1
+      48: anewarray     #53                 // class com/fasterxml/jackson/databind/DeserializationFeature
+      51: dup
+      52: iconst_0
+      53: getstatic     #55                 // Field com/fasterxml/jackson/databind/DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES:Lcom/fasterxml/jackson/databind/DeserializationFeature;
+      56: aastore
+      57: invokevirtual #59                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.disable:([Lcom/fasterxml/jackson/databind/DeserializationFeature;)Lcom/fasterxml/jackson/databind/cfg/MapperBuilder;
+      60: checkcast     #60                 // class com/fasterxml/jackson/databind/json/JsonMapper$Builder
+      63: iconst_1
+      64: anewarray     #65                 // class com/fasterxml/jackson/databind/SerializationFeature
+      67: dup
+      68: iconst_0
+      69: getstatic     #67                 // Field com/fasterxml/jackson/databind/SerializationFeature.FAIL_ON_EMPTY_BEANS:Lcom/fasterxml/jackson/databind/SerializationFeature;
+      72: aastore
+      73: invokevirtual #71                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.disable:([Lcom/fasterxml/jackson/databind/SerializationFeature;)Lcom/fasterxml/jackson/databind/cfg/MapperBuilder;
+      76: checkcast     #60                 // class com/fasterxml/jackson/databind/json/JsonMapper$Builder
+      79: iconst_1
+      80: anewarray     #65                 // class com/fasterxml/jackson/databind/SerializationFeature
+      83: dup
+      84: iconst_0
+      85: getstatic     #74                 // Field com/fasterxml/jackson/databind/SerializationFeature.WRITE_DATES_AS_TIMESTAMPS:Lcom/fasterxml/jackson/databind/SerializationFeature;
+      88: aastore
+      89: invokevirtual #71                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.disable:([Lcom/fasterxml/jackson/databind/SerializationFeature;)Lcom/fasterxml/jackson/databind/cfg/MapperBuilder;
+      92: checkcast     #60                 // class com/fasterxml/jackson/databind/json/JsonMapper$Builder
+      95: getstatic     #77                 // Field com/fasterxml/jackson/annotation/JsonInclude$Include.NON_NULL:Lcom/fasterxml/jackson/annotation/JsonInclude$Include;
+      98: invokevirtual #83                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.serializationInclusion:(Lcom/fasterxml/jackson/annotation/JsonInclude$Include;)Lcom/fasterxml/jackson/databind/cfg/MapperBuilder;
+     101: checkcast     #60                 // class com/fasterxml/jackson/databind/json/JsonMapper$Builder
+     104: invokestatic  #87                 // Method org/springframework/ai/util/JacksonUtils.instantiateAvailableModules:()Ljava/util/List;
+     107: invokevirtual #93                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.addModules:(Ljava/lang/Iterable;)Lcom/fasterxml/jackson/databind/cfg/MapperBuilder;
+     110: checkcast     #60                 // class com/fasterxml/jackson/databind/json/JsonMapper$Builder
+     113: invokevirtual #97                 // Method com/fasterxml/jackson/databind/json/JsonMapper$Builder.build:()Lcom/fasterxml/jackson/databind/ObjectMapper;
+     116: putfield      #101                // Field mapper:Lcom/fasterxml/jackson/databind/ObjectMapper;
+     119: return
+
+  public org.springframework.ai.audio.transcription.AudioTranscriptionResponse call(org.springframework.ai.audio.transcription.AudioTranscriptionPrompt);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #105                // Method mergeOptions:(Lorg/springframework/ai/audio/transcription/AudioTranscriptionPrompt;)Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+       5: astore_2
+       6: aload_2
+       7: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      10: invokestatic  #113                // Method com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.isLiveTranslate:(Ljava/lang/String;)Z
+      13: ifeq          46
+      16: aload_1
+      17: instanceof    #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      20: ifne          33
+      23: new           #121                // class java/lang/IllegalArgumentException
+      26: dup
+      27: ldc           #123                // String Prompt type is not DashScopeAudioTranscriptionPrompt.
+      29: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      32: athrow
+      33: aload_0
+      34: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      37: aload_1
+      38: checkcast     #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      41: aload_2
+      42: invokevirtual #128                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.callLiveTranslate:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lorg/springframework/ai/audio/transcription/AudioTranscriptionResponse;
+      45: areturn
+      46: aload_2
+      47: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      50: invokestatic  #132                // Method com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.isAsr:(Ljava/lang/String;)Z
+      53: ifeq          86
+      56: aload_1
+      57: instanceof    #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      60: ifne          73
+      63: new           #121                // class java/lang/IllegalArgumentException
+      66: dup
+      67: ldc           #123                // String Prompt type is not DashScopeAudioTranscriptionPrompt.
+      69: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      72: athrow
+      73: aload_0
+      74: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      77: aload_1
+      78: checkcast     #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      81: aload_2
+      82: invokevirtual #135                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.callAsr:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lorg/springframework/ai/audio/transcription/AudioTranscriptionResponse;
+      85: areturn
+      86: aload_2
+      87: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      90: invokestatic  #138                // Method com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.isQwenAsr:(Ljava/lang/String;)Z
+      93: ifeq          126
+      96: aload_1
+      97: instanceof    #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+     100: ifne          113
+     103: new           #121                // class java/lang/IllegalArgumentException
+     106: dup
+     107: ldc           #123                // String Prompt type is not DashScopeAudioTranscriptionPrompt.
+     109: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     112: athrow
+     113: aload_0
+     114: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+     117: aload_1
+     118: checkcast     #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+     121: aload_2
+     122: invokevirtual #141                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.callQwenAsr:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lorg/springframework/ai/audio/transcription/AudioTranscriptionResponse;
+     125: areturn
+     126: new           #121                // class java/lang/IllegalArgumentException
+     129: dup
+     130: aload_2
+     131: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+     134: invokedynamic #144,  0            // InvokeDynamic #0:makeConcatWithConstants:(Ljava/lang/String;)Ljava/lang/String;
+     139: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+     142: athrow
+
+  public reactor.core.publisher.Flux<org.springframework.ai.audio.transcription.AudioTranscriptionResponse> stream(org.springframework.ai.audio.transcription.AudioTranscriptionPrompt);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: invokevirtual #105                // Method mergeOptions:(Lorg/springframework/ai/audio/transcription/AudioTranscriptionPrompt;)Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+       5: astore_2
+       6: aload_2
+       7: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      10: invokestatic  #113                // Method com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.isLiveTranslate:(Ljava/lang/String;)Z
+      13: ifeq          46
+      16: aload_1
+      17: instanceof    #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      20: ifne          33
+      23: new           #121                // class java/lang/IllegalArgumentException
+      26: dup
+      27: ldc           #123                // String Prompt type is not DashScopeAudioTranscriptionPrompt.
+      29: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      32: athrow
+      33: aload_0
+      34: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      37: aload_1
+      38: checkcast     #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      41: aload_2
+      42: invokevirtual #148                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.streamLiveTranslate:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+      45: areturn
+      46: aload_2
+      47: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      50: invokestatic  #138                // Method com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.isQwenAsr:(Ljava/lang/String;)Z
+      53: ifeq          86
+      56: aload_1
+      57: instanceof    #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      60: ifne          73
+      63: new           #121                // class java/lang/IllegalArgumentException
+      66: dup
+      67: ldc           #123                // String Prompt type is not DashScopeAudioTranscriptionPrompt.
+      69: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      72: athrow
+      73: aload_0
+      74: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      77: aload_1
+      78: checkcast     #119                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt
+      81: aload_2
+      82: invokevirtual #152                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.streamQwenAsr:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionPrompt;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+      85: areturn
+      86: aconst_null
+      87: astore_3
+      88: aload_1
+      89: invokevirtual #155                // Method org/springframework/ai/audio/transcription/AudioTranscriptionPrompt.getInstructions:()Lorg/springframework/core/io/Resource;
+      92: invokeinterface #161,  1          // InterfaceMethod org/springframework/core/io/Resource.getInputStream:()Ljava/io/InputStream;
+      97: invokevirtual #167                // Method java/io/InputStream.readAllBytes:()[B
+     100: astore_3
+     101: goto          116
+     104: astore        4
+     106: new           #175                // class java/lang/RuntimeException
+     109: dup
+     110: aload         4
+     112: invokespecial #177                // Method java/lang/RuntimeException."<init>":(Ljava/lang/Throwable;)V
+     115: athrow
+     116: aload_3
+     117: invokestatic  #180                // Method java/nio/ByteBuffer.wrap:([B)Ljava/nio/ByteBuffer;
+     120: astore        4
+     122: aload_0
+     123: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+     126: aload         4
+     128: aload_2
+     129: invokevirtual #186                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.createWebSocketTask:(Ljava/nio/ByteBuffer;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+     132: aload_0
+     133: aload_2
+     134: invokedynamic #190,  0            // InvokeDynamic #1:apply:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Ljava/util/function/Function;
+     139: invokevirtual #194                // Method reactor/core/publisher/Flux.map:(Ljava/util/function/Function;)Lreactor/core/publisher/Flux;
+     142: areturn
+    Exception table:
+       from    to  target type
+          88   101   104   Class java/io/IOException
+
+  public reactor.core.publisher.Flux<com.alibaba.cloud.ai.dashscope.audio.transcription.RecognitionResult> streamRecognition(reactor.core.publisher.Flux<java.nio.ByteBuffer>, com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: invokevirtual #200                // Method mergeOptions:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+       5: astore_3
+       6: getstatic     #203                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.PARAFORMER_REALTIME_ONLY_LIST:Ljava/util/List;
+       9: aload_3
+      10: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      13: invokeinterface #207,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+      18: ifne          41
+      21: new           #121                // class java/lang/IllegalArgumentException
+      24: dup
+      25: getstatic     #203                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.PARAFORMER_REALTIME_ONLY_LIST:Ljava/util/List;
+      28: aload_3
+      29: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      32: invokedynamic #213,  0            // InvokeDynamic #2:makeConcatWithConstants:(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+      37: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      40: athrow
+      41: aload_0
+      42: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      45: aload_1
+      46: aload_3
+      47: invokevirtual #216                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.createWebSocketStreamingTask:(Lreactor/core/publisher/Flux;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+      50: aload_0
+      51: invokedynamic #220,  0            // InvokeDynamic #3:apply:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;)Ljava/util/function/Function;
+      56: invokevirtual #194                // Method reactor/core/publisher/Flux.map:(Ljava/util/function/Function;)Lreactor/core/publisher/Flux;
+      59: areturn
+
+  public reactor.core.publisher.Flux<com.alibaba.cloud.ai.dashscope.audio.transcription.TranslationRecognitionResult> streamTranslation(reactor.core.publisher.Flux<java.nio.ByteBuffer>, com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: invokevirtual #200                // Method mergeOptions:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+       5: astore_3
+       6: getstatic     #223                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.GUMMY_REALTIME_LIST:Ljava/util/List;
+       9: aload_3
+      10: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      13: invokeinterface #207,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+      18: ifne          41
+      21: new           #121                // class java/lang/IllegalArgumentException
+      24: dup
+      25: getstatic     #223                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.GUMMY_REALTIME_LIST:Ljava/util/List;
+      28: aload_3
+      29: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      32: invokedynamic #226,  0            // InvokeDynamic #4:makeConcatWithConstants:(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+      37: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      40: athrow
+      41: aload_0
+      42: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      45: aload_1
+      46: aload_3
+      47: invokevirtual #216                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.createWebSocketStreamingTask:(Lreactor/core/publisher/Flux;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+      50: aload_0
+      51: invokedynamic #227,  0            // InvokeDynamic #5:apply:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;)Ljava/util/function/Function;
+      56: invokevirtual #194                // Method reactor/core/publisher/Flux.map:(Ljava/util/function/Function;)Lreactor/core/publisher/Flux;
+      59: areturn
+
+  public reactor.core.publisher.Flux<com.alibaba.cloud.ai.dashscope.audio.transcription.TranslationRecognitionResult> streamTranslationChat(reactor.core.publisher.Flux<java.nio.ByteBuffer>, com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions);
+    Code:
+       0: aload_0
+       1: aload_2
+       2: invokevirtual #200                // Method mergeOptions:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;
+       5: astore_3
+       6: getstatic     #228                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.GUMMY_CHAT_LIST:Ljava/util/List;
+       9: aload_3
+      10: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      13: invokeinterface #207,  2          // InterfaceMethod java/util/List.contains:(Ljava/lang/Object;)Z
+      18: ifne          41
+      21: new           #121                // class java/lang/IllegalArgumentException
+      24: dup
+      25: getstatic     #228                // Field com/alibaba/cloud/ai/dashscope/common/DashScopeAudioApiConstants.GUMMY_CHAT_LIST:Ljava/util/List;
+      28: aload_3
+      29: invokevirtual #109                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions.getModel:()Ljava/lang/String;
+      32: invokedynamic #231,  0            // InvokeDynamic #6:makeConcatWithConstants:(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+      37: invokespecial #125                // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+      40: athrow
+      41: aload_0
+      42: getfield      #28                 // Field audioTranscriptionApi:Lcom/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi;
+      45: aload_1
+      46: aload_3
+      47: invokevirtual #216                // Method com/alibaba/cloud/ai/dashscope/api/DashScopeAudioTranscriptionApi.createWebSocketStreamingTask:(Lreactor/core/publisher/Flux;Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionOptions;)Lreactor/core/publisher/Flux;
+      50: aload_0
+      51: invokedynamic #227,  0            // InvokeDynamic #5:apply:(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;)Ljava/util/function/Function;
+      56: invokevirtual #194                // Method reactor/core/publisher/Flux.map:(Ljava/util/function/Function;)Lreactor/core/publisher/Flux;
+      59: invokedynamic #232,  0            // InvokeDynamic #7:test:()Ljava/util/function/Predicate;
+      64: invokevirtual #236                // Method reactor/core/publisher/Flux.takeUntil:(Ljava/util/function/Predicate;)Lreactor/core/publisher/Flux;
+      67: areturn
+
+  public com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel$Builder mutate();
+    Code:
+       0: new           #361                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder
+       3: dup
+       4: aload_0
+       5: invokespecial #363                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder."<init>":(Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;)V
+       8: areturn
+
+  public com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel clone();
+    Code:
+       0: aload_0
+       1: invokevirtual #364                // Method mutate:()Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder;
+       4: invokevirtual #368                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder.build:()Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;
+       7: areturn
+
+  public static com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel$Builder builder();
+    Code:
+       0: new           #361                // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder
+       3: dup
+       4: invokespecial #371                // Method com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel$Builder."<init>":()V
+       7: areturn
+
+  public java.lang.Object clone() throws java.lang.CloneNotSupportedException;
+    Code:
+       0: aload_0
+       1: invokevirtual #372                // Method clone:()Lcom/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel;
+       4: areturn
+
+  public org.springframework.ai.model.ModelResponse call(org.springframework.ai.model.ModelRequest);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: checkcast     #156                // class org/springframework/ai/audio/transcription/AudioTranscriptionPrompt
+       5: invokevirtual #375                // Method call:(Lorg/springframework/ai/audio/transcription/AudioTranscriptionPrompt;)Lorg/springframework/ai/audio/transcription/AudioTranscriptionResponse;
+       8: areturn
+
+  public reactor.core.publisher.Flux stream(org.springframework.ai.model.ModelRequest);
+    Code:
+       0: aload_0
+       1: aload_1
+       2: checkcast     #156                // class org/springframework/ai/audio/transcription/AudioTranscriptionPrompt
+       5: invokevirtual #379                // Method stream:(Lorg/springframework/ai/audio/transcription/AudioTranscriptionPrompt;)Lreactor/core/publisher/Flux;
+       8: areturn
+
+  static {};
+    Code:
+       0: ldc           #8                  // class com/alibaba/cloud/ai/dashscope/audio/transcription/DashScopeAudioTranscriptionModel
+       2: invokestatic  #387                // Method org/slf4j/LoggerFactory.getLogger:(Ljava/lang/Class;)Lorg/slf4j/Logger;
+       5: putstatic     #264                // Field logger:Lorg/slf4j/Logger;
+       8: return
+}
