@@ -178,6 +178,3 @@ backend-spring/
 - `sessionId`：会话 ID
 - `title`：会话标题
 
-## 许可证
-
-MIT License
