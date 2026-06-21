@@ -1,0 +1,27 @@
+package start.properties;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "tj.ai.prompt")
+public class SystemMessageProperties {
+
+    private SystemMessage systemMessage; // 系统提示语，用于课程推荐、购买业务
+
+    @Data
+    public static class SystemMessage {
+        private Chat chat; // 系统提示语，用于课程推荐、购买业务
+        private Chat routeAgent; // 路由智能体系统提示词
+        private Chat recommendAgent; // 推荐智能体系统提示词
+        private Chat knowledgeAgent; //知识讲解智能体
+        @Data
+        public static class Chat {
+            private String dataId;
+            private String group = "DEFAULT_GROUP";
+            private long timeoutMs = 20000L; // 读取的超时时间，单位毫秒
+        }
+    }
+}
