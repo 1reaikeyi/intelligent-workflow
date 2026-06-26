@@ -49,7 +49,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> impl
         // 随机获取examples
         sessionVO.setExamples(RandomUtil.randomEleList(sessionProperties.getExamples(),Integer.parseInt(num.toString())));
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
         String formattedDate = now.format(formatter);
         // 随机生成sessionId
         sessionVO.setSessionId(formattedDate);

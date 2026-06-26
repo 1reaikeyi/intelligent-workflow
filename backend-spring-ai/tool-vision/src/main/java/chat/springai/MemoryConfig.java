@@ -20,16 +20,16 @@ public class MemoryConfig {
         return new SimpleLoggerAdvisor();
     }
     @Bean
+    public Advisor messageWindowAdvisor(ChatMemory chatMemory) {
+        return MessageChatMemoryAdvisor.builder(chatMemory).build();
+    }
+    @Bean
     public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository) {
         // 基于 chatMemoryRepository 对象构建 chatMemory 对象
         return MessageWindowChatMemory.builder()
                 .chatMemoryRepository(chatMemoryRepository)
                 .maxMessages(20) // 最多保存 20 条对话, 如果超出的话，会自动删除最旧的对话
                 .build();
-    }
-    @Bean
-    public Advisor messageWindowAdvisor(ChatMemory chatMemory) {
-        return MessageChatMemoryAdvisor.builder(chatMemory).build();
     }
 }
 

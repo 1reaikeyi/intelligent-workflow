@@ -6,9 +6,9 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   # 图片上传限制
-    image:
-      max-width: 2048
-      max-height: 2048
+image:
+  max-width: 2048
+  max-height: 2048
   ai:
     openai:
       base-url: https://api-inference.modelscope.cn

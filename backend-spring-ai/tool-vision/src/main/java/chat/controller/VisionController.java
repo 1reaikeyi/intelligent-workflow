@@ -18,9 +18,9 @@ import java.io.IOException;
 @RequestMapping
 public class VisionController {
 
-    @Value("${spring.application.servlet.image.max-width:2048}")
+    @Value("${image.max-width:2048}")
     private int maxWidth;
-    @Value("${spring.application.servlet.image.max-height:2048}")
+    @Value("${image.max-height:2048}")
     private int maxHeight;
 
     @Resource
