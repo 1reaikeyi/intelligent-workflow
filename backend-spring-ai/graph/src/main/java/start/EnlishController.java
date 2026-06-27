@@ -18,7 +18,7 @@ public class EnlishController {
     private NodeLink nodeLink;
     
     /**
-     * 执行英语学习流程：单词 -> 造句 -> 翻译
+     * 执行英语学习流程：单词 -> 造句 -> 翻译 ->语音合成
      * @param word 输入的英文单词
      * @return 翻译结果
      */
@@ -29,8 +29,9 @@ public class EnlishController {
         // 执行状态图，invoke() 方法接受 Map<String, Object> 类型参数
         // 返回 Optional<OverAllState>，通过 map 提取结果
         return compiledGraph.invoke(Map.of("word", word))
-                .map(state -> "sentence:: "+state.value("sentence").orElse("null") +
-                             "translation::" + state.value("translation").orElse("null"))
+                .map(state -> "==>sentence==>"+state.value("sentence").orElse("null") +
+                             "==>translation==>" + state.value("translation").orElse("null")+
+                             "==>read==>" + state.value("read").orElse("null"))
                 .orElse("执行失败");
     }
 }

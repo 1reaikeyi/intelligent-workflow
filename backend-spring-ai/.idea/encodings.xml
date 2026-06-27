@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/audio/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/graph/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/media/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/media/src/main/resources/application.properties" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rag-chat/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rag-chat/src/main/resources/application-dev.properties" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

@@ -13,6 +13,5 @@ public class SpringAI {
         return ChatClient.builder(openAiChatModel)
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
-
     }
 }

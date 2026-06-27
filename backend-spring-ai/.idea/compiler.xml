@@ -8,8 +8,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="tool-vision" />
-        <module name="media" />
         <module name="rag-chat" />
+        <module name="audio" />
         <module name="graph" />
       </profile>
     </annotationProcessing>
@@ -19,8 +19,8 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="audio" options="-parameters" />
       <module name="graph" options="-parameters" />
-      <module name="media" options="-parameters" />
       <module name="rag-chat" options="-parameters" />
       <module name="tool-vision" options="-parameters" />
       <module name="visual" options="-parameters" />

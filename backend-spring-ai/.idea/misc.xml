@@ -10,6 +10,9 @@
         <option value="$PROJECT_DIR$/quick_qwen/pom.xml" />
         <option value="$PROJECT_DIR$/quick-qwen/pom.xml" />
         <option value="$PROJECT_DIR$/tool-vision/pom.xml" />
+        <option value="$PROJECT_DIR$/media/pom.xml" />
+        <option value="$PROJECT_DIR$/audio/pom.xml" />
+        <option value="$PROJECT_DIR$/graph/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

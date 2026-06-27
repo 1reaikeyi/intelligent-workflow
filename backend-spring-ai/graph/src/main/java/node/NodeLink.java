@@ -21,15 +21,18 @@ public class NodeLink {
     private Sentence sentenceAction;
     @Autowired
     private Translation translationAction;
+    @Autowired
+    private Read readAction;
 
-    @Bean("Enlish")
+    @Bean
     public CompiledGraph toEnlish() {
         KeyStrategyFactory strategyFactory = new KeyStrategyFactory() {
             @Override
             public Map<String, KeyStrategy> apply() {
                 return Map.of(
                         "word", new ReplaceStrategy(),
-                        "sentence", new ReplaceStrategy()
+                        "sentence", new ReplaceStrategy(),
+                        "translation",new ReplaceStrategy()
                 );
             }
         };
@@ -38,6 +41,7 @@ public class NodeLink {
         try {
             graph.addNode("node1", AsyncNodeAction.node_async(sentenceAction));
             graph.addNode("node2", AsyncNodeAction.node_async(translationAction));
+            graph.addNode("node3", AsyncNodeAction.node_async(readAction));
         } catch (GraphStateException e) {
             throw new RuntimeException(e);
         }
@@ -45,7 +49,8 @@ public class NodeLink {
         try {
             graph.addEdge(StateGraph.START,"node1");
             graph.addEdge("node1","node2");
-            graph.addEdge("node2",StateGraph.END);
+            graph.addEdge("node2","node3");
+            graph.addEdge("node3",StateGraph.END);
         } catch (GraphStateException e) {
             throw new RuntimeException(e);
         }
