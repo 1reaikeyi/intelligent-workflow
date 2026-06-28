@@ -18,7 +18,7 @@ public class TTSController {
     public ResponseEntity<byte[]> ttsPlay(@RequestBody String text) {
         byte[] audioData = TTSService.TTS(text);
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("tts/mpeg"))
+                .contentType(MediaType.parseMediaType("audio/mpeg"))
                 .body(audioData);
     }
 }

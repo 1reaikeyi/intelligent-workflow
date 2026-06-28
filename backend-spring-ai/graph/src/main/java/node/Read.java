@@ -23,9 +23,7 @@ public class Read implements NodeAction {
     public Map<String, Object> apply(OverAllState state) throws Exception {
         String text = state.value("sentence","") +
                 state.value("translation","");
-        TextToSpeechPrompt prompt = new TextToSpeechPrompt(text);
-        TextToSpeechResponse response = openAiAudioSpeechModel.call(prompt);
-        byte[] audio = response.getResult().getOutput();
+        byte[] audio = chat(text);
 
         // 2. 保存音频文件到本地
         String fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".mp3";
@@ -41,5 +39,10 @@ public class Read implements NodeAction {
             throw new IOException("音频文件保存失败", e);
         }
         return Map.of("read", path.getAbsolutePath());
+    }
+    public byte[] chat(String text){
+        TextToSpeechPrompt prompt = new TextToSpeechPrompt(text);
+        TextToSpeechResponse response = openAiAudioSpeechModel.call(prompt);
+        return response.getResult().getOutput();
     }
 }

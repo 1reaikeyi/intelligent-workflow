@@ -18,10 +18,13 @@ public class Sentence implements NodeAction {
         PromptTemplate promptTemplate = new PromptTemplate("你负责英语造句"+
                 "根据给定的单词{word}造句,返回一个英文句子");
         promptTemplate.add("word", word);
-        String result = chatClient.prompt()
-                .user(promptTemplate.render())
+        String result = chat(promptTemplate.render());
+        return Map.of("sentence", result != null ? result : "null");
+    }
+    public String chat(String word) {
+        return chatClient.prompt()
+                .user(word)
                 .call()
                 .content();
-        return Map.of("sentence", result != null ? result : "null");
     }
 }

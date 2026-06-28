@@ -19,11 +19,14 @@ public class Translation implements NodeAction{
         PromptTemplate promptTemplate = new PromptTemplate("你是负责英语翻译"+
                 "根据给定的{sentence}翻译成中文");
         promptTemplate.add("sentence", sentence);
-        String result = chatClient.prompt()
-                .user(promptTemplate.render())
+        String result = chat(promptTemplate.render());
+        return Map.of("translation", result != null ? result : "null");
+    }
+    public String chat(String sentence) {
+        return  chatClient.prompt()
+                .user(sentence)
                 .call()
                 .content();
-        return Map.of("translation", result != null ? result : "null");
     }
 
 }
