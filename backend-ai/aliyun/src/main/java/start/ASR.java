@@ -2,13 +2,8 @@ package start;
 
 
 import com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionModel;
-import com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeAudioTranscriptionOptions;
-import com.alibaba.cloud.ai.dashscope.audio.transcription.DashScopeTranscriptionApiSpec;
-import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
-import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-public class STT {
+public class ASR {
     @Autowired
     private DashScopeAudioTranscriptionModel dashScopeAudioTranscriptionModel;
     @Value("${spring.ai.dashscope.api-key}")

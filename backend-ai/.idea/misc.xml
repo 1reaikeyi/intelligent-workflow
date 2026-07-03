@@ -8,7 +8,14 @@
         <option value="$PROJECT_DIR$/graph/pom.xml" />
         <option value="$PROJECT_DIR$/speech/pom.xml" />
         <option value="$PROJECT_DIR$/rag-chat/pom.xml" />
+        <option value="$PROJECT_DIR$/aliyun/pom.xml" />
+        <option value="$PROJECT_DIR$/local/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/local/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">

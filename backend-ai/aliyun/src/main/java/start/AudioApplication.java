@@ -16,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Slf4j
 //主程序入口
 @SpringBootApplication
-@ComponentScan({"tts","start","stt"})
+@ComponentScan({"tts","start"})
 public class AudioApplication {
     public static void main(String[] args){
         SpringApplication.run(AudioApplication.class, args);

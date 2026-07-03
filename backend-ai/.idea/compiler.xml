@@ -10,12 +10,17 @@
         <module name="see" />
         <module name="rag-chat" />
         <module name="speech" />
+        <module name="aliyun" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="local" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="graph" options="" />
+      <module name="aliyun" options="-parameters" />
+      <module name="local" options="-parameters" />
       <module name="rag-chat" options="-parameters" />
       <module name="see" options="-parameters" />
       <module name="speech" options="-parameters" />

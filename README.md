@@ -41,8 +41,8 @@
 | 模块 | 技术要点 | 核心职责 |
 |------|----------|----------|
 | **rag-chat** | Spring AI, MyBatis Plus, Redis, MySQL | RAG 检索增强、工具调用、Agent 智能对话、会话管理 |
-| **graph** | DashScope Graph 状态图引擎 | 英语学习工作流：输入单词 → AI 造句 → AI 翻译 |
-| **tool-vision** | Spring AI, MyBatis Plus, OpenAI Vision | 图像识别、敏感词过滤 |
+| **speech** | Spring AI, DashScope Graph, SiliconFlow | 语音识别、语音合成、英语学习工作流 |
+| **see** | Spring AI, ModelScope, OpenAI Vision | 图像识别、敏感词过滤、工具调用 |
 | **frontend-vue-ai** | Vue 3, Element Plus | 前端界面，流式对话展示、暗黑主题 |
 
 #### 关键实现
@@ -89,8 +89,8 @@
 
 ```
 ai-assistant/
-├── backend-spring-ai/               # 后端父工程（Maven 多模块）
-│   ├── rag-chat/                    # AI 对话核心模块
+├── backend-ai/                      # 后端父工程（Maven 多模块）
+│   ├── rag-chat/                    # RAG + 工具调用核心模块
 │   │   ├── src/main/java/
 │   │   │   ├── mapper/              # MyBatis Plus Mapper 接口
 │   │   │   ├── model/
@@ -108,25 +108,24 @@ ai-assistant/
 │   │   │   └── start/               # 启动配置与控制器
 │   │   ├── src/main/resources/      # 配置文件
 │   │   └── src/test/java/           # 测试代码
-│   ├── media/                       # 文本转语音（TTS）模块
-│   │   ├── tts/                     # TTS 服务（DashScope 语音合成）
-│   │   └── start/                   # 控制器与启动类
-│   ├── graph/                       # 英语学习流程图模块
-│   │   ├── node/                    # 图节点（造句、翻译）
-│   │   ├── config/                  # 图配置
-│   │   └── start/                   # 控制器与启动类
-│   ├── tool-vision/                 # 工具调用 + 视觉识别模块（独立工程）
-│   │   ├── controller/              # 工具对话 & 视觉识别 API
-│   │   ├── service/                 # 套餐工具 & 视觉服务
-│   │   ├── springai/                # Spring AI 配置
-│   │   └── Interceptor/             # 敏感词拦截器
+│   ├── speech/                      # 语音识别 + 语音合成 + 工作流模块
+│   │   ├── src/main/java/
+│   │   │   ├── chat/
+│   │   │   │   ├── config/          # Spring AI 配置、Graph 配置
+│   │   │   │   ├── node/            # 图节点（Sentence, Translation, Read）
+│   │   │   │   ├── start/           # 控制器（ASRController, ASR2, EnlishController）
+│   │   │   │   └── LanguageApplication.java
+│   │   │   └── config/              # 自定义配置（CustomTranscriptionConfig）
+│   │   └── src/main/resources/      # 配置文件（SiliconFlow API）
+│   ├── see/                         # 视觉识别 + 工具调用模块
+│   │   ├── src/main/java/
+│   │   │   ├── chat/
+│   │   │   │   ├── Interceptor/     # 敏感词拦截器
+│   │   │   │   ├── config/          # Spring AI 配置
+│   │   │   │   ├── controller/      # 图像识别 API
+│   │   │   │   └── node/            # 节点（ToolNode, VisualNode）
+│   │   └── src/main/resources/      # 配置文件（ModelScope API）
 │   └── pom.xml                      # Maven 父工程配置
-├── frontend-vue-ai/                 # Vue 3 前端
-│   └── src/
-│       ├── views/                   # 页面（tool.vue, vision.vue）
-│       ├── api/                     # API 请求封装
-│       ├── router/                  # 路由（/tool, /see）
-│       └── components/              # 公共组件
 └── README.md
 ```
 
@@ -134,42 +133,35 @@ ai-assistant/
 
 ## 技术栈
 
-| 分类 | 技术 | 版本 |
-|------|------|------|
-| 语言 | Java (OpenJDK) | 17 |
-| 框架 | Spring Boot | 3.3.8 |
-| AI 框架 | Spring AI | 1.1.0 |
-| ORM | MyBatis Plus | 3.5.9 |
-| 数据库 | MySQL | 8.0+ |
-| 缓存 | Redis | 7.0+ |
-| 向量存储 | Redis Vector Store | - |
-| 大模型 | OpenAI / 阿里云 DashScope | - |
-| 工具库 | Hutool | 5.8.36 |
-| 前端 | Vue 3 + Element Plus | - |
+| 分类 | 技术 | 版本 | 说明 |
+|------|------|------|------|
+| 语言 | Java (OpenJDK) | 17 | 后端开发语言 |
+| 框架 | Spring Boot | 3.3.8 | 后端应用框架 |
+| AI 框架 | Spring AI | 1.1.0 | AI 能力集成框架 |
+| ORM | MyBatis Plus | 3.5.9 | 数据库访问框架 |
+| 数据库 | MySQL | 8.0+ | 会话记录持久化 |
+| 缓存 | Redis | 7.0+ | 会话记忆缓存、向量存储 |
+| 向量存储 | Redis Vector Store | - | RAG 检索向量数据库 |
+| 大模型 | OpenAI / 阿里云 DashScope / ModelScope | - | 多厂商模型支持 |
+| 语音识别 | SiliconFlow SenseVoiceSmall | - | 中英文语音转文字 |
+| 语音合成 | DashScope CosyVoice2 | - | 文本转语音 |
+| 工作流引擎 | DashScope Graph | 1.1.0.0 | 状态图编排引擎 |
+| 工具库 | Hutool | 5.8.36 | Java 工具库 |
+| 前端 | Vue 3 + Element Plus | - | 前端 UI 框架 |
 
 ---
 
 ## 核心功能
 
-### 1. 工作流 — graph 模块
-
-基于 **DashScope Graph 状态图引擎** 构建英语学习工作流，以有向图方式编排 AI 节点，实现可追溯的多步骤任务流程。
-
-**英语学习工作流**：
-
-```
-用户输入单词 → [Sentence 节点] AI造句 → [Translation 节点] AI翻译 → 返回双语结果
-```
-
-- **节点化编排**：每个图节点（Sentence / Translation）独立调用 AI `ChatClient`，职责单一、可复用
-- **自动流转**：状态图编译后自动执行节点链，前一节点的输出作为后一节点的上下文
-- **可视化调试**：编译时自动生成 PlantUML 图，便于理解和调试工作流拓扑
-
-### 2. RAG + 工具调用 — rag-chat 模块
+### 1. RAG + 工具调用 — rag-chat 模块
 
 结合 **RAG 检索增强** 和 **Tool Calling 工具调用**，让 AI 既能从私有知识库获取信息，又能自主查询业务数据，实现精准回答。
 
 **RAG 检索增强**：
+
+```
+用户提问 → [QuestionAnswerAdvisor] 向量检索 → 知识库上下文注入 → [ChatClient] AI 回答
+```
 
 - **向量存储**：基于 Redis VectorStore 存储文档向量，支持语义相似度检索
 - **自动增强**：`QuestionAnswerAdvisor` 在每次对话中自动从知识库检索相关内容，注入 AI 上下文
@@ -177,32 +169,102 @@ ai-assistant/
 
 **工具调用（Tool Calling）**：
 
-- **课程查询工具**：通过 `@Tool` 注解注册，支持按 ID、名称、分类、价格区间、状态等多维度查询
+```
+用户提问 → [ChatClient] 意图分析 → [@Tool 注解工具] 自主调用 → 返回结果
+```
+
+- **课程查询工具**：通过 `@Tool` 注解注册，支持按 ID、名称、分类、价格区间、状态等多维度查询课程
 - **AI 自主决策**：AI 模型根据用户问题自动选择合适的工具方法查询数据库
 - **结果关联**：`ToolResultHolder` 跟踪工具调用结果与请求 ID 的映射
 
-**Agent 路由引擎**：
+**Agent 智能体体系**：
 
-用户输入 → 路由智能体分析意图 → 分发到专业智能体处理
+- **路由智能体（RouteAgent）**：分析用户意图，返回意图标识（RECOMMEND、KNOWLEDGE）
+- **知识问答智能体（KnowledgeAgent）**：基于 RAG 检索增强的知识问答
+- **推荐智能体（RecommendAgent）**：结合课程工具和 RAG 的课程推荐
+- 使用 `SpringUtil.getBeansOfType()` 实现 Agent 的动态查找和路由
 
-- **路由智能体（RouteAgent）**：判断用户意图（知识问答 / 课程推荐 / UI 变更）
-- **知识问答智能体（KnowledgeAgent）**：基于 RAG 检索增强回答专业问题
-- **课程推荐智能体（RecommendAgent）**：结合工具调用和 RAG，推荐课程信息
+**会话记忆管理**：
 
-**会话管理**：
+- 支持 **MySQL 持久化** 和 **Redis 缓存** 两种记忆存储方式
+- 会话按时间分组：当天、最近30天、最近1年、1年以上
+- `MessageWindowChatMemory` 支持最多保存 20 条对话上下文
 
-- **记忆存储**：MySQL 持久化 + Redis 缓存，支持 20 条上下文记忆
-- **会话列表**：按时间分组（当天、30天、1年、更早）
-- **标题管理**：自动 / 手动更新会话标题
+### 2. 语音识别与合成 — speech 模块
 
-### 3. 视觉识别 — tool-vision 模块
+基于 **SiliconFlow** 平台实现完整的语音能力，包括语音识别（ASR）和语音合成（TTS）。
 
-基于 **多模态大模型** 实现图像识别，支持用户上传图片并由 AI 分析识别内容。
+**语音识别（ASR）**：
+
+| 接口 | 路径 | 实现方式 | 返回格式 |
+|------|------|----------|----------|
+| 手动构建 | `/asr` | HttpClient 手动构建 multipart/form-data | `{"success": boolean, "transcription": string}` |
+| Spring AI 封装 | `/asr2` | `OpenAiAudioTranscriptionModel.call()` | `{"success": boolean, "transcription": string}` |
+| 简化返回 | `/asr3` | Spring AI 封装，仅返回文本 | 纯文本字符串 |
+
+**核心实现要点**：
+
+- 使用 Spring AI 的 `OpenAiAudioTranscriptionModel` 封装 SiliconFlow API 调用
+- 配置 `response-format=json` 确保 API 返回 JSON 格式响应
+- 自定义 `CustomTranscriptionConfig` 配置 `RestClient.Builder`，解决 SiliconFlow 返回 `application/octet-stream` 导致的反序列化问题
+- `MappingJackson2HttpMessageConverter` 同时支持 `application/json` 和 `application/octet-stream` 媒体类型
+
+**语音合成（TTS）**：
+
+- **模型**：`FunAudioLLM/CosyVoice2-0.5B`
+- **输出格式**：MP3
+- **可配置参数**：语速（speed）、音色（voice）、响应格式（response-format）
+- **工作流集成**：作为 `Read` 节点集成到英语学习工作流中，自动将翻译结果转为语音
+
+**英语学习工作流**：
+
+基于 **DashScope Graph 状态图引擎** 构建英语学习工作流，以有向图方式编排 AI 节点。
+
+```
+用户输入单词 → [Sentence 节点] AI 造句 → [Translation 节点] AI 翻译 → [Read 节点] 语音合成 → 返回结果
+```
+
+**工作流实现分析**：
+
+- **节点设计**：
+  - `Sentence`：接收单词，调用 `ChatClient` 生成英文例句
+  - `Translation`：接收例句，调用 `ChatClient` 翻译成中文
+  - `Read`：接收中文翻译，调用 `OpenAiAudioSpeechModel` 生成语音文件
+
+- **状态管理**：
+  - 使用 `OverAllState` 存储工作流上下文
+  - 前一节点的输出通过 `state.value()` 传递给下一节点
+  - 支持 `Map<String, Object>` 格式的状态数据传递
+
+- **图配置**：
+  - `GraphConfig` 定义节点链和连接关系
+  - 编译时自动生成 PlantUML 图，便于可视化调试
+
+- **自动执行**：
+  - 状态图编译后自动执行节点链
+  - 无需手动编排调用顺序
+
+### 3. 视觉识别 — see 模块
+
+基于 **多模态大模型（ModelScope Qwen）** 实现图像识别，支持用户上传图片并由 AI 分析识别内容。
+
+**图像识别流程**：
+
+```
+用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码 → [VisionService] 多模态模型调用 → 返回识别结果
+```
+
+**核心实现**：
 
 - **图片上传识别**：接收上传的图片文件，自动校验尺寸（最大 2048×2048）
 - **Base64 嵌入**：将图片转为 `data:image/jpeg;base64,...` URI 嵌入多模态模型请求
 - **灵活输入**：支持本地文件路径和 HTTP 上传字节两种方式
 - **安全过滤**：`SensitiveWordInterceptor` 对对话接口启用敏感词检测，命中则返回 400
+
+**工具调用集成**：
+
+- 套餐工具查询：通过 `SetmealTool` 实现数据库查询
+- 节点化设计：`ToolNode` 和 `VisualNode` 分别处理工具调用和视觉识别任务
 
 ---
 
@@ -213,47 +275,146 @@ ai-assistant/
 
 ### 环境要求
 
-- JDK 17+
-- Maven 3.8+
-- MySQL 8.0+
-- Redis 7.0+
-- OpenAI API Key 或阿里云 DashScope API Key
+| 依赖 | 版本 | 用途 |
+|------|------|------|
+| JDK | 17+ | 后端运行环境 |
+| Maven | 3.8+ | 项目构建工具 |
+| MySQL | 8.0+ | 会话记录持久化（rag-chat 模块） |
+| Redis | 7.0+ | 会话记忆缓存、向量存储（rag-chat 模块） |
+| AI API Key | - | ModelScope / SiliconFlow |
 
-### 启动后端
+### 配置说明
+
+每个模块使用独立的配置文件，需在对应模块的 `src/main/resources/application.properties` 中配置：
+
+| 模块 | 配置文件 | 所需 API Key |
+|------|----------|-------------|
+| rag-chat | `application-dev.properties` | ModelScope |
+| speech | `application.properties` | SiliconFlow |
+| see | `application.properties` | ModelScope |
+
+## 使用示例
+
+### RAG 对话
 
 ```bash
-# 1. 配置数据库和 AI 模型密钥
-cd backend-spring-ai/rag-chat/src/main/resources
-# 编辑 application-dev.properties 和 application.yml
+# 调用智能路由对话接口（SSE 流式）
+curl -X POST http://localhost:8080/agent \
+  -H "Content-Type: application/json" \
+  -d '{"question": "推荐一门Java课程", "sessionId": "test-123"}'
 
-# 2. 编译启动核心对话模块
-cd backend-spring-ai/rag-chat
-mvn spring-boot:run
-cd ../graph    # 英语学习模块
-mvn spring-boot:run
-
-cd ../tool-vision  # 工具视觉模块（独立工程）
-mvn spring-boot:run
+# 调用普通对话接口
+curl -X POST http://localhost:8080/chat \
+  -H "Content-Type: application/json" \
+  -d '{"question": "什么是RAG?", "sessionId": "test-123"}'
 ```
 
-### 启动前端
+### 工具调用
 
 ```bash
-cd frontend-vue-ai
-npm install
-npm run dev
+# 调用课程查询工具
+curl http://localhost:8080/tool
+```
+
+### 语音识别
+
+```bash
+# 调用 /asr3 接口（直接返回文本）
+curl -X POST http://localhost:8080/asr3 \
+  -F "file=@test.mp3"
+
+# 调用 /asr2 接口（完整结果）
+curl -X POST http://localhost:8080/asr2 \
+  -F "file=@test.wav"
+```
+
+### 英语学习工作流
+
+```bash
+# 输入单词，获取造句 + 翻译 + 语音合成
+curl -X POST http://localhost:8080/Enlish \
+  -H "Content-Type: application/json" \
+  -d '{"word": "serendipity"}'
+```
+
+### 图像识别
+
+```bash
+# 调用图像识别接口
+curl -X POST http://localhost:8080/vision \
+  -F "file=@test.jpg"
 ```
 
 ---
 
-## API 概览
+## 工作流分析
 
-| 模块 | 方法 | 端点 | 说明 |
-|------|------|------|------|
-| Agent | POST | `/agent` | 智能路由对话（SSE 流式） |
-| Chat | POST | `/chat` | 对话 |
-| Embedding | POST | `/embedding` | 向量嵌入 |
-| Session | GET/POST/DELETE | `/session/**` | 会话管理 |
-| Tool | GET | `/tool` | 工具对话 |
-| Vision | POST | `/vision` | 图像识别 |
-| Graph | POST | `/Enlish` | 英语学习工作流 |
+### rag-chat 模块工作流
+
+```
+用户输入 → [AgentController] → [AgentServiceImpl] → [RouteAgent] 意图识别
+                                                           ├→ [KnowledgeAgent] → [RagServiceImpl] → Redis VectorStore 检索 → ChatClient 回答
+                                                           └→ [RecommendAgent] → [CourseTools] 工具调用 → ChatClient 回答
+```
+
+- **路由决策**：`RouteAgent` 根据用户问题判断意图，分发到对应的专业智能体
+- **RAG 增强**：`KnowledgeAgent` 通过 `QuestionAnswerAdvisor` 自动从知识库检索相关内容
+- **工具调用**：`RecommendAgent` 通过 `@Tool` 注解的 `CourseTools` 查询课程数据库
+- **会话记忆**：所有对话通过 `ChatMemory` 管理上下文，支持 MySQL 和 Redis 两种存储方式
+
+### speech 模块工作流
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        语音识别工作流                              │
+├─────────────────────────────────────────────────────────────────────┤
+│ 用户上传音频 → [ASR2 Controller] → [OpenAiAudioTranscriptionModel]  │
+│                                      ↓                            │
+│                            SiliconFlow API 调用                    │
+│                                      ↓                            │
+│                            返回 JSON 格式识别结果                   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        英语学习工作流                              │
+├─────────────────────────────────────────────────────────────────────┤
+│ 用户输入单词 → [EnlishController] → [GraphConfig] 编译状态图        │
+│                                      ↓                            │
+│                          [Sentence 节点] 生成英文例句               │
+│                                      ↓                            │
+│                          [Translation 节点] 翻译成中文             │
+│                                      ↓                            │
+│                          [Read 节点] 语音合成生成 MP3              │
+│                                      ↓                            │
+│                          返回 {sentence, translation, audioPath}   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+- **状态图编排**：使用 DashScope Graph 定义节点链，编译后自动执行
+- **节点通信**：通过 `OverAllState` 传递数据，前一节点输出作为后一节点输入
+- **可视化调试**：编译时生成 PlantUML 图，便于理解工作流拓扑
+
+### see 模块工作流
+
+```
+用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码
+                    ↓
+            [VisionService] 构建多模态请求 → [OpenAiChatModel] 调用
+                    ↓
+                返回识别结果
+```
+
+- **安全过滤**：`SensitiveWordInterceptor` 对请求进行敏感词检测
+- **图片处理**：自动校验尺寸，支持本地文件和上传文件两种输入方式
+- **多模态调用**：将图片转为 Base64 嵌入模型请求，实现图文理解
+
+---
+
+## 注意事项
+
+1. **端口冲突**：所有模块默认使用 8080 端口，同时启动多个模块时需修改配置文件中的 `server.port`
+2. **API Key 安全**：建议通过环境变量传递 API Key，避免硬编码到配置文件
+3. **语音识别兼容性**：SiliconFlow SenseVoiceSmall 模型支持 mp3、wav、m4a 等常见音频格式
+4. **向量存储**：RAG 功能依赖 Redis Vector Store，需确保 Redis 7.0+ 版本并启用向量索引
+5. **内存管理**：会话记忆默认保留最近 20 条消息，可通过配置调整
+6. **工作流调试**：英语学习工作流编译时会生成 PlantUML 图，可用于可视化调试
