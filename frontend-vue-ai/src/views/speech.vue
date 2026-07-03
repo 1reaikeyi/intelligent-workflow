@@ -1,8 +1,6 @@
-<script setup>
-import { ref, nextTick, onMounted, watch } from 'vue';
-import { Plus, Moon, Sunny, User, ArrowRight, CircleClose, Upload } from '@element-plus/icons-vue';
+<script setup>import { ref, nextTick, onMounted, watch } from 'vue';
+import { Plus, Moon, Sunny, User, ArrowRight, CircleClose } from '@element-plus/icons-vue';
 import { createToolChat } from '@/api/tool';
-
 // 聊天状态
 const messages = ref([]);
 const userInput = ref('');
@@ -11,276 +9,181 @@ const chatContainer = ref(null);
 const textarea = ref(null);
 const darkMode = ref(false);
 const memoryId = ref(Date.now().toString());
-
 // 创建工具聊天实例
 const toolChat = createToolChat();
 let typingInterval = null;
-
-// 上传文件状态
-const uploadedFiles = ref([]);
-const fileInput = ref(null);
-
 /**
  * 调整文本域高度
  */
 const adjustTextareaHeight = () => {
-  const textareaEl = textarea.value;
-  if (!textareaEl) return;
-  textareaEl.style.height = 'auto';
-  textareaEl.style.height = `${Math.min(textareaEl.scrollHeight, 200)}px`;
+ const textareaEl = textarea.value;
+ if (!textareaEl)
+ return;
+ textareaEl.style.height = 'auto';
+ textareaEl.style.height = `${Math.min(textareaEl.scrollHeight, 200)}px`;
 };
-
 /**
  * 滚动到底部
  */
 const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatContainer.value) {
-      chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-    }
-  });
+ nextTick(() => {
+ if (chatContainer.value) {
+ chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+ }
+ });
 };
-
 /**
  * 切换暗黑模式
  */
 const toggleDarkMode = () => {
-  darkMode.value = !darkMode.value;
-  localStorage.setItem('darkMode', darkMode.value);
+ darkMode.value = !darkMode.value;
+ localStorage.setItem('darkMode', darkMode.value);
 };
-
 /**
  * 新建会话
  */
 const startNewConversation = () => {
-  messages.value = [];
-  memoryId.value = Date.now().toString();
-  messages.value.push({
-    role: 'assistant',
-    content: '你好！我是Qwen,请问有什么能帮到您？',
-    isLoading: false,
-    visibleChars: 0,
-    isStreaming: false
-  });
-  messages.value[0].visibleChars = messages.value[0].content.length;
-  scrollToBottom();
-  nextTick(() => {
-    textarea.value?.focus();
-  });
+ messages.value = [];
+ memoryId.value = Date.now().toString();
+ messages.value.push({
+ role: 'assistant',
+ content: '你好！我是Qwen,请问有什么能帮到您？',
+ isLoading: false,
+ visibleChars: 0,
+ isStreaming: false
+ });
+ messages.value[0].visibleChars = messages.value[0].content.length;
+ scrollToBottom();
+ nextTick(() => {
+ textarea.value?.focus();
+ });
 };
-
 /**
  * 打字机效果
  */
 const startTypingEffect = (messageIndex) => {
-  const message = messages.value[messageIndex];
-  if (!message || message.visibleChars >= message.content.length) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-    messages.value[messageIndex].isStreaming = false;
-    return;
-  }
-  messages.value[messageIndex].visibleChars++;
-  scrollToBottom();
+ const message = messages.value[messageIndex];
+ if (!message || message.visibleChars >= message.content.length) {
+ clearInterval(typingInterval);
+ typingInterval = null;
+ messages.value[messageIndex].isStreaming = false;
+ return;
+ }
+ messages.value[messageIndex].visibleChars++;
+ scrollToBottom();
 };
-
 /**
  * 发送消息
  */
 const sendMessage = async () => {
-  if (!userInput.value.trim() && uploadedFiles.value.length === 0) return;
-  if (isLoading.value) return;
-
-  // 构建消息内容，包含文件信息
-  let messageContent = userInput.value.trim();
-  if (uploadedFiles.value.length > 0) {
-    const fileNames = uploadedFiles.value.map(f => f.name).join(', ');
-    if (messageContent) {
-      messageContent += `\n\n附件: ${fileNames}`;
-    } else {
-      messageContent = `附件: ${fileNames}`;
-    }
-  }
-
-  const userMessage = {
-    role: 'user',
-    content: messageContent,
-    isLoading: false,
-    visibleChars: messageContent.length,
-    isStreaming: false,
-    files: uploadedFiles.value.length > 0 ? [...uploadedFiles.value] : null
-  };
-
-  messages.value.push(userMessage);
-
-  const assistantMessage = {
-    role: 'assistant',
-    content: '',
-    isLoading: true,
-    visibleChars: 0,
-    isStreaming: true
-  };
-
-  messages.value.push(assistantMessage);
-
-  userInput.value = '';
-  // 在清空之前保存文件列表，用于发送给 API
-  const filesToSend = [...uploadedFiles.value];
-  uploadedFiles.value = [];
-  adjustTextareaHeight();
-  scrollToBottom();
-
-  isLoading.value = true;
-
-  const messageIndex = messages.value.length - 1;
-
-  // 清除之前的打字效果
-  if (typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-  }
-
-  await toolChat.send(memoryId.value, messageContent, {
-    onStart: () => {},
-    onChunk: (buffer) => {
-      messages.value[messageIndex].content = buffer;
-      messages.value[messageIndex].isLoading = false;
-      if (!typingInterval) {
-        typingInterval = setInterval(() => {
-          startTypingEffect(messageIndex);
-        }, 20);
-      }
-      scrollToBottom();
-    },
-    onDone: () => {
-      const lastMessage = messages.value[messageIndex];
-      lastMessage.isLoading = false;
-      lastMessage.isStreaming = false;
-      if (lastMessage.visibleChars < lastMessage.content.length) {
-        lastMessage.visibleChars = lastMessage.content.length;
-      }
-      isLoading.value = false;
-      if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
-      }
-      scrollToBottom();
-    },
-    onError: (err) => {
-      const lastMessage = messages.value[messageIndex];
-      lastMessage.content = '抱歉，请求过程中出现错误: ' + err.message;
-      lastMessage.visibleChars = lastMessage.content.length;
-      lastMessage.isLoading = false;
-      lastMessage.isStreaming = false;
-      isLoading.value = false;
-    }
-  }, filesToSend);
+ if (!userInput.value.trim() || isLoading.value)
+ return;
+ const userMessage = {
+ role: 'user',
+ content: userInput.value.trim(),
+ isLoading: false,
+ visibleChars: userInput.value.trim().length,
+ isStreaming: false
+ };
+ messages.value.push(userMessage);
+ const assistantMessage = {
+ role: 'assistant',
+ content: '',
+ isLoading: true,
+ visibleChars: 0,
+ isStreaming: true
+ };
+ messages.value.push(assistantMessage);
+ userInput.value = '';
+ adjustTextareaHeight();
+ scrollToBottom();
+ isLoading.value = true;
+ const messageIndex = messages.value.length - 1;
+ // 清除之前的打字效果
+ if (typingInterval) {
+ clearInterval(typingInterval);
+ typingInterval = null;
+ }
+ await toolChat.send(memoryId.value, userMessage.content, {
+ onStart: () => { },
+ onChunk: (buffer) => {
+ messages.value[messageIndex].content = buffer;
+ messages.value[messageIndex].isLoading = false;
+ if (!typingInterval) {
+ typingInterval = setInterval(() => {
+ startTypingEffect(messageIndex);
+ }, 20);
+ }
+ scrollToBottom();
+ },
+ onDone: () => {
+ const lastMessage = messages.value[messageIndex];
+ lastMessage.isLoading = false;
+ lastMessage.isStreaming = false;
+ if (lastMessage.visibleChars < lastMessage.content.length) {
+ lastMessage.visibleChars = lastMessage.content.length;
+ }
+ isLoading.value = false;
+ if (typingInterval) {
+ clearInterval(typingInterval);
+ typingInterval = null;
+ }
+ scrollToBottom();
+ },
+ onError: (err) => {
+ const lastMessage = messages.value[messageIndex];
+ lastMessage.content = '抱歉，请求过程中出现错误: ' + err.message;
+ lastMessage.visibleChars = lastMessage.content.length;
+ lastMessage.isLoading = false;
+ lastMessage.isStreaming = false;
+ isLoading.value = false;
+ }
+ });
 };
-
 /**
  * 停止响应
  */
 const stopResponse = () => {
-  toolChat.abort();
-  const lastMessage = messages.value[messages.value.length - 1];
-  if (lastMessage) {
-    lastMessage.isLoading = false;
-    lastMessage.isStreaming = false;
-    if (lastMessage.visibleChars < lastMessage.content.length) {
-      lastMessage.visibleChars = lastMessage.content.length;
-    }
-  }
-  isLoading.value = false;
-  if (typingInterval) {
-    clearInterval(typingInterval);
-    typingInterval = null;
-  }
+ toolChat.abort();
+ const lastMessage = messages.value[messages.value.length - 1];
+ if (lastMessage) {
+ lastMessage.isLoading = false;
+ lastMessage.isStreaming = false;
+ if (lastMessage.visibleChars < lastMessage.content.length) {
+ lastMessage.visibleChars = lastMessage.content.length;
+ }
+ }
+ isLoading.value = false;
+ if (typingInterval) {
+ clearInterval(typingInterval);
+ typingInterval = null;
+ }
 };
-
-/**
- * 打开文件选择对话框
- */
-const openFileSelector = () => {
-  fileInput.value?.click();
-};
-
-/**
- * 处理文件选择
- */
-const handleFileChange = (event) => {
-  const files = Array.from(event.target.files);
-  if (files.length === 0) return;
-
-  files.forEach(file => {
-    // 限制文件大小为 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      alert('文件大小不能超过 10MB');
-      return;
-    }
-
-    // 创建文件信息对象
-    const fileInfo = {
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: formatFileSize(file.size),
-      type: file.type,
-      file: file
-    };
-
-    uploadedFiles.value.push(fileInfo);
-  });
-
-  // 清空 input，允许重复选择相同文件
-  event.target.value = '';
-};
-
-/**
- * 格式化文件大小
- */
-const formatFileSize = (bytes) => {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-};
-
-/**
- * 移除已上传的文件
- */
-const removeFile = (fileId) => {
-  const index = uploadedFiles.value.findIndex(f => f.id === fileId);
-  if (index !== -1) {
-    uploadedFiles.value.splice(index, 1);
-  }
-};
-
 /**
  * 组件挂载时初始化
  */
 onMounted(() => {
-  const savedDarkMode = localStorage.getItem('darkMode');
-  if (savedDarkMode !== null) {
-    darkMode.value = savedDarkMode === 'true';
-  } else {
-    darkMode.value = false;
-    localStorage.setItem('darkMode', 'false');
-  }
-
-  messages.value.push({
-    role: 'assistant',
-    content: '你好！我是qwen,请问有什么能帮到您？',
-    isLoading: false,
-    visibleChars: 0,
-    isStreaming: false
-  });
-
-  messages.value[0].visibleChars = messages.value[0].content.length;
-  scrollToBottom();
-
-  nextTick(() => {
-    textarea.value?.focus();
-  });
+ const savedDarkMode = localStorage.getItem('darkMode');
+ if (savedDarkMode !== null) {
+ darkMode.value = savedDarkMode === 'true';
+ }
+ else {
+ darkMode.value = false;
+ localStorage.setItem('darkMode', 'false');
+ }
+ messages.value.push({
+ role: 'assistant',
+ content: '你好！我是qwen,请问有什么能帮到您？',
+ isLoading: false,
+ visibleChars: 0,
+ isStreaming: false
+ });
+ messages.value[0].visibleChars = messages.value[0].content.length;
+ scrollToBottom();
+ nextTick(() => {
+ textarea.value?.focus();
+ });
 });
-
 /**
  * 监听消息变化自动滚动
  */
@@ -370,32 +273,7 @@ watch(messages, scrollToBottom, { deep: true });
 
     <!-- 输入框区域 -->
     <footer class="chat-footer">
-      <!-- 已上传文件列表 -->
-      <div v-if="uploadedFiles.length > 0" class="files-list">
-        <div
-          v-for="file in uploadedFiles"
-          :key="file.id"
-          class="file-item"
-        >
-          <i class="fas fa-file-alt"></i>
-          <span class="file-name">{{ file.name }}</span>
-          <span class="file-size">{{ file.size }}</span>
-          <button @click="removeFile(file.id)" class="remove-file-btn">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-
       <div class="input-wrapper">
-        <!-- 上传按钮 -->
-        <button
-          @click="openFileSelector"
-          class="upload-btn"
-          type="button"
-        >
-          <el-icon><Upload /></el-icon>
-        </button>
-
         <textarea
           v-model="userInput"
           @keydown.enter.exact.prevent="sendMessage"
@@ -409,7 +287,7 @@ watch(messages, scrollToBottom, { deep: true });
         ></textarea>
         <el-button
           @click="isLoading ? stopResponse() : sendMessage()"
-          :disabled="(uploadedFiles.length === 0) && !isLoading"
+          :disabled="!userInput.trim() && !isLoading"
           :type="isLoading ? 'danger' : 'primary'"
           class="send-btn"
           circle
@@ -418,15 +296,6 @@ watch(messages, scrollToBottom, { deep: true });
           <el-icon v-else><ArrowRight /></el-icon>
         </el-button>
       </div>
-
-      <!-- 隐藏的文件选择器 -->
-      <input
-        ref="fileInput"
-        type="file"
-        multiple
-        @change="handleFileChange"
-        class="hidden-file-input"
-      />
     </footer>
   </div>
 </template>
@@ -725,102 +594,5 @@ watch(messages, scrollToBottom, { deep: true });
   height: 44px;
   padding: 0;
   flex-shrink: 0;
-}
-
-/* 上传按钮 */
-.upload-btn {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 12px;
-  background: #f3f4f6;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.2s, color 0.2s;
-}
-
-.upload-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.chat-container.dark .upload-btn {
-  background: #374151;
-  color: #9ca3af;
-}
-
-.chat-container.dark .upload-btn:hover {
-  background: #4b5563;
-  color: #d1d5db;
-}
-
-/* 已上传文件列表 */
-.files-list {
-  max-width: 900px;
-  margin: 0 auto 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* 文件项 */
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #f3f4f6;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-.chat-container.dark .file-item {
-  background: #374151;
-}
-
-.file-item i {
-  color: #2563eb;
-  font-size: 14px;
-}
-
-.file-name {
-  color: #374151;
-  font-weight: 500;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chat-container.dark .file-name {
-  color: #d1d5db;
-}
-
-.file-size {
-  color: #9ca3af;
-  font-size: 12px;
-}
-
-.remove-file-btn {
-  border: none;
-  background: transparent;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 4px;
-  transition: color 0.2s;
-}
-
-.remove-file-btn:hover {
-  color: #ef4444;
-}
-
-/* 隐藏的文件选择器 */
-.hidden-file-input {
-  display: none;
 }
 </style>

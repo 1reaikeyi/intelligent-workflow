@@ -17,7 +17,7 @@ export function createToolChat() {
      * @param {Function} callbacks.onDone    传输完成，参数
      * @param {Function} callbacks.onError   出错，参数
      */
-    async send(memoryId, message, { onStart, onChunk, onDone, onError } = {}) {
+    async send(memoryId, message, { onStart, onChunk, onDone, onError } = {}, files = []) {
       // 先中止上一次未完成的请求
       this.abort();
 
@@ -27,9 +27,21 @@ export function createToolChat() {
       try {
         onStart?.();
 
-        // 关键修改：拼接 baseURL，使得请求路径变为 /api/tool?...
-        const url = `${baseURL}/tool?message=${encodeURIComponent(message)}&memoryId=${encodeURIComponent(memoryId)}`;
-        const response = await fetch(url, { signal });
+        // 构建 FormData
+        const formData = new FormData();
+        formData.append('question', message);
+
+        // 添加文件（确保至少有一个文件）
+        files.forEach(file => {
+          formData.append('file', file.file);
+        });
+
+        const url = `${baseURL}/see`;
+        const response = await fetch(url, {
+          signal,
+          method: 'POST',
+          body: formData
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
