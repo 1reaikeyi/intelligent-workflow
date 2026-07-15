@@ -2,9 +2,7 @@
 
 > 一个基于 Spring AI 的多功能 AI 助手后端服务平台，集成大语言模型对话、智能体路由、RAG 检索增强、工具调用、图像识别、工作流引擎等多种 AI 能力。
 
----
-
-## STAR
+## 
 
 ### Situation（背景）
 
@@ -24,19 +22,6 @@
 ### Action（行动）
 
 围绕上述目标，基于 **Spring Boot 3.x + Spring AI 1.x** 技术栈，采用 **Maven 多模块架构** 构建后端服务，配套 **Vue 3 前端** 实现用户交互：
-
-#### 架构设计
-
-整体采用 **路由-执行** 模式（Routing-Execution Pattern）作为核心业务流程引擎：
-
-```
-用户输入 → [路由智能体] → 意图分类
-                            ├→ 知识问答智能体（RAG 增强）
-                            ├→ 课程推荐智能体（工具调用）
-                            └→ 路由规则变更（界面 UI 控制）
-```
-
-#### 模块划分
 
 | 模块 | 技术要点 | 核心职责 |
 |------|----------|----------|
@@ -84,6 +69,185 @@
 - **工程化交付**：Maven 多模块管理，各模块可独立部署、独立演进
 
 ---
+
+## 功能
+
+### 1. RAG + 工具调用 — rag-chat 模块
+
+结合 **RAG 检索增强** 和 **Tool Calling 工具调用**，让 AI 既能从私有知识库获取信息，又能自主查询业务数据，实现精准回答。
+
+**RAG 检索增强**：
+
+```
+用户提问 → [QuestionAnswerAdvisor] 向量检索 → 知识库上下文注入 → [ChatClient] AI 回答
+```
+
+- **向量存储**：基于 Redis VectorStore 存储文档向量，支持语义相似度检索
+- **自动增强**：`QuestionAnswerAdvisor` 在每次对话中自动从知识库检索相关内容，注入 AI 上下文
+- **可配置策略**：相似度阈值 0.6、Top-K 6 条
+
+**工具调用（Tool Calling）**：
+
+```
+用户提问 → [ChatClient] 意图分析 → [@Tool 注解工具] 自主调用 → 返回结果
+```
+
+- **课程查询工具**：通过 `@Tool` 注解注册，支持按 ID、名称、分类、价格区间、状态等多维度查询课程
+- **AI 自主决策**：AI 模型根据用户问题自动选择合适的工具方法查询数据库
+- **结果关联**：`ToolResultHolder` 跟踪工具调用结果与请求 ID 的映射
+
+**Agent 智能体体系**：
+
+- **路由智能体（RouteAgent）**：分析用户意图，返回意图标识（RECOMMEND、KNOWLEDGE）
+- **知识问答智能体（KnowledgeAgent）**：基于 RAG 检索增强的知识问答
+- **推荐智能体（RecommendAgent）**：结合课程工具和 RAG 的课程推荐
+- 使用 `SpringUtil.getBeansOfType()` 实现 Agent 的动态查找和路由
+
+#### 架构设计
+
+整体采用 **路由-执行** 模式（Routing-Execution Pattern）作为核心业务流程引擎：
+
+```
+用户输入 → [路由智能体] → 意图分类
+                            ├→ 知识问答智能体（RAG 增强）
+                            ├→ 课程推荐智能体（工具调用）
+                            └→ 路由规则变更（界面 UI 控制）
+```
+
+#### 模块划分
+
+**会话记忆管理**：
+
+- 支持 **MySQL 持久化** 和 **Redis 缓存** 两种记忆存储方式
+- 会话按时间分组：当天、最近30天、最近1年、1年以上
+- `MessageWindowChatMemory` 支持最多保存 20 条对话上下文
+
+### 2. 语音识别与合成 — speech 模块
+
+基于 **SiliconFlow** 平台实现完整的语音能力，包括语音识别（ASR）和语音合成（TTS）。
+
+**语音识别（ASR）**：
+
+| 接口           | 路径    | 实现方式                                | 返回格式                                        |
+| -------------- | ------- | --------------------------------------- | ----------------------------------------------- |
+| 手动构建       | `/asr`  | HttpClient 手动构建 multipart/form-data | `{"success": boolean, "transcription": string}` |
+| Spring AI 封装 | `/asr2` | `OpenAiAudioTranscriptionModel.call()`  | `{"success": boolean, "transcription": string}` |
+| 简化返回       | `/asr3` | Spring AI 封装，仅返回文本              | 纯文本字符串                                    |
+
+**核心实现要点**：
+
+- 使用 Spring AI 的 `OpenAiAudioTranscriptionModel` 封装 SiliconFlow API 调用
+- 配置 `response-format=json` 确保 API 返回 JSON 格式响应
+- 自定义 `CustomTranscriptionConfig` 配置 `RestClient.Builder`，解决 SiliconFlow 返回 `application/octet-stream` 导致的反序列化问题
+- `MappingJackson2HttpMessageConverter` 同时支持 `application/json` 和 `application/octet-stream` 媒体类型
+
+**语音合成（TTS）**：
+
+- **模型**：`FunAudioLLM/CosyVoice2-0.5B`
+- **输出格式**：MP3
+- **可配置参数**：语速（speed）、音色（voice）、响应格式（response-format）
+- **工作流集成**：作为 `Read` 节点集成到英语学习工作流中，自动将翻译结果转为语音
+
+**英语学习工作流**：
+
+基于 **DashScope Graph 状态图引擎** 构建英语学习工作流，以有向图方式编排 AI 节点。
+
+```
+用户输入单词 → [Sentence 节点] AI 造句 → [Translation 节点] AI 翻译 → [Read 节点] 语音合成 → 返回结果
+```
+
+**工作流实现分析**：
+
+- **节点设计**：
+  - `Sentence`：接收单词，调用 `ChatClient` 生成英文例句
+  - `Translation`：接收例句，调用 `ChatClient` 翻译成中文
+  - `Read`：接收中文翻译，调用 `OpenAiAudioSpeechModel` 生成语音文件
+
+- **状态管理**：
+  - 使用 `OverAllState` 存储工作流上下文
+  - 前一节点的输出通过 `state.value()` 传递给下一节点
+  - 支持 `Map<String, Object>` 格式的状态数据传递
+
+- **图配置**：
+  - `GraphConfig` 定义节点链和连接关系
+  - 编译时自动生成 PlantUML 图，便于可视化调试
+
+- **自动执行**：
+  - 状态图编译后自动执行节点链
+  - 无需手动编排调用顺序
+
+### 3. 视觉识别 — see 模块
+
+基于 **多模态大模型（ModelScope Qwen）** 实现图像识别，支持用户上传图片并由 AI 分析识别内容。
+
+**图像识别流程**：
+
+```
+用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码 → [VisionService] 多模态模型调用 → 返回识别结果
+```
+
+**核心实现**：
+
+- **图片上传识别**：接收上传的图片文件，自动校验尺寸（最大 2048×2048）
+- **Base64 嵌入**：将图片转为 `data:image/jpeg;base64,...` URI 嵌入多模态模型请求
+- **灵活输入**：支持本地文件路径和 HTTP 上传字节两种方式
+- **安全过滤**：`SensitiveWordInterceptor` 对对话接口启用敏感词检测，命中则返回 400
+
+**工具调用集成**：
+
+- 套餐工具查询：通过 `SetmealTool` 实现数据库查询
+- 节点化设计：`ToolNode` 和 `VisualNode` 分别处理工具调用和视觉识别任务
+
+## 工作流分析
+
+### rag-chat 模块工作流
+
+```
+用户输入 → [AgentController] → [AgentServiceImpl] → [RouteAgent] 意图识别
+                                                           ├→ [KnowledgeAgent] → [RagServiceImpl] → Redis VectorStore 检索 → ChatClient 回答
+                                                           └→ [RecommendAgent] → [CourseTools] 工具调用 → ChatClient 回答
+```
+
+- **路由决策**：`RouteAgent` 根据用户问题判断意图，分发到对应的专业智能体
+- **RAG 增强**：`KnowledgeAgent` 通过 `QuestionAnswerAdvisor` 自动从知识库检索相关内容
+- **工具调用**：`RecommendAgent` 通过 `@Tool` 注解的 `CourseTools` 查询课程数据库
+- **会话记忆**：所有对话通过 `ChatMemory` 管理上下文，支持 MySQL 和 Redis 两种存储方式
+
+### speech 模块工作流
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        英语学习工作流                              │
+├─────────────────────────────────────────────────────────────────────┤
+│ 用户输入单词 → [EnlishController] → [GraphConfig] 编译状态图        │
+│                                      ↓                            │
+│                          [Sentence 节点] 生成英文例句               │
+│                                      ↓                            │
+│                          [Translation 节点] 翻译成中文             │
+│                                      ↓                            │
+│                          [Read 节点] 语音合成生成 MP3              │
+│                                      ↓                            │
+│                          返回 {sentence, translation, audioPath}   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+- **状态图编排**：使用 DashScope Graph 定义节点链，编译后自动执行
+- **节点通信**：通过 `OverAllState` 传递数据，前一节点输出作为后一节点输入
+- **可视化调试**：编译时生成 PlantUML 图，便于理解工作流拓扑
+
+### see 模块工作流
+
+```
+用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码
+                    ↓
+            [VisionService] 构建多模态请求 → [OpenAiChatModel] 调用
+                  									  ↓
+                								返回识别结果
+```
+
+- **安全过滤**：`SensitiveWordInterceptor` 对请求进行敏感词检测
+- **图片处理**：自动校验尺寸，支持本地文件和上传文件两种输入方式
+- **多模态调用**：将图片转为 Base64 嵌入模型请求，实现图文理解
 
 ## 项目结构
 
@@ -151,129 +315,9 @@ ai-assistant/
 
 ---
 
-## 核心功能
-
-### 1. RAG + 工具调用 — rag-chat 模块
-
-结合 **RAG 检索增强** 和 **Tool Calling 工具调用**，让 AI 既能从私有知识库获取信息，又能自主查询业务数据，实现精准回答。
-
-**RAG 检索增强**：
-
-```
-用户提问 → [QuestionAnswerAdvisor] 向量检索 → 知识库上下文注入 → [ChatClient] AI 回答
-```
-
-- **向量存储**：基于 Redis VectorStore 存储文档向量，支持语义相似度检索
-- **自动增强**：`QuestionAnswerAdvisor` 在每次对话中自动从知识库检索相关内容，注入 AI 上下文
-- **可配置策略**：相似度阈值 0.6、Top-K 6 条
-
-**工具调用（Tool Calling）**：
-
-```
-用户提问 → [ChatClient] 意图分析 → [@Tool 注解工具] 自主调用 → 返回结果
-```
-
-- **课程查询工具**：通过 `@Tool` 注解注册，支持按 ID、名称、分类、价格区间、状态等多维度查询课程
-- **AI 自主决策**：AI 模型根据用户问题自动选择合适的工具方法查询数据库
-- **结果关联**：`ToolResultHolder` 跟踪工具调用结果与请求 ID 的映射
-
-**Agent 智能体体系**：
-
-- **路由智能体（RouteAgent）**：分析用户意图，返回意图标识（RECOMMEND、KNOWLEDGE）
-- **知识问答智能体（KnowledgeAgent）**：基于 RAG 检索增强的知识问答
-- **推荐智能体（RecommendAgent）**：结合课程工具和 RAG 的课程推荐
-- 使用 `SpringUtil.getBeansOfType()` 实现 Agent 的动态查找和路由
-
-**会话记忆管理**：
-
-- 支持 **MySQL 持久化** 和 **Redis 缓存** 两种记忆存储方式
-- 会话按时间分组：当天、最近30天、最近1年、1年以上
-- `MessageWindowChatMemory` 支持最多保存 20 条对话上下文
-
-### 2. 语音识别与合成 — speech 模块
-
-基于 **SiliconFlow** 平台实现完整的语音能力，包括语音识别（ASR）和语音合成（TTS）。
-
-**语音识别（ASR）**：
-
-| 接口 | 路径 | 实现方式 | 返回格式 |
-|------|------|----------|----------|
-| 手动构建 | `/asr` | HttpClient 手动构建 multipart/form-data | `{"success": boolean, "transcription": string}` |
-| Spring AI 封装 | `/asr2` | `OpenAiAudioTranscriptionModel.call()` | `{"success": boolean, "transcription": string}` |
-| 简化返回 | `/asr3` | Spring AI 封装，仅返回文本 | 纯文本字符串 |
-
-**核心实现要点**：
-
-- 使用 Spring AI 的 `OpenAiAudioTranscriptionModel` 封装 SiliconFlow API 调用
-- 配置 `response-format=json` 确保 API 返回 JSON 格式响应
-- 自定义 `CustomTranscriptionConfig` 配置 `RestClient.Builder`，解决 SiliconFlow 返回 `application/octet-stream` 导致的反序列化问题
-- `MappingJackson2HttpMessageConverter` 同时支持 `application/json` 和 `application/octet-stream` 媒体类型
-
-**语音合成（TTS）**：
-
-- **模型**：`FunAudioLLM/CosyVoice2-0.5B`
-- **输出格式**：MP3
-- **可配置参数**：语速（speed）、音色（voice）、响应格式（response-format）
-- **工作流集成**：作为 `Read` 节点集成到英语学习工作流中，自动将翻译结果转为语音
-
-**英语学习工作流**：
-
-基于 **DashScope Graph 状态图引擎** 构建英语学习工作流，以有向图方式编排 AI 节点。
-
-```
-用户输入单词 → [Sentence 节点] AI 造句 → [Translation 节点] AI 翻译 → [Read 节点] 语音合成 → 返回结果
-```
-
-**工作流实现分析**：
-
-- **节点设计**：
-  - `Sentence`：接收单词，调用 `ChatClient` 生成英文例句
-  - `Translation`：接收例句，调用 `ChatClient` 翻译成中文
-  - `Read`：接收中文翻译，调用 `OpenAiAudioSpeechModel` 生成语音文件
-
-- **状态管理**：
-  - 使用 `OverAllState` 存储工作流上下文
-  - 前一节点的输出通过 `state.value()` 传递给下一节点
-  - 支持 `Map<String, Object>` 格式的状态数据传递
-
-- **图配置**：
-  - `GraphConfig` 定义节点链和连接关系
-  - 编译时自动生成 PlantUML 图，便于可视化调试
-
-- **自动执行**：
-  - 状态图编译后自动执行节点链
-  - 无需手动编排调用顺序
-
-### 3. 视觉识别 — see 模块
-
-基于 **多模态大模型（ModelScope Qwen）** 实现图像识别，支持用户上传图片并由 AI 分析识别内容。
-
-**图像识别流程**：
-
-```
-用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码 → [VisionService] 多模态模型调用 → 返回识别结果
-```
-
-**核心实现**：
-
-- **图片上传识别**：接收上传的图片文件，自动校验尺寸（最大 2048×2048）
-- **Base64 嵌入**：将图片转为 `data:image/jpeg;base64,...` URI 嵌入多模态模型请求
-- **灵活输入**：支持本地文件路径和 HTTP 上传字节两种方式
-- **安全过滤**：`SensitiveWordInterceptor` 对对话接口启用敏感词检测，命中则返回 400
-
-**工具调用集成**：
-
-- 套餐工具查询：通过 `SetmealTool` 实现数据库查询
-- 节点化设计：`ToolNode` 和 `VisualNode` 分别处理工具调用和视觉识别任务
-
----
 
 
----
-
-## 快速开始
-
-### 环境要求
+## 环境要求
 
 | 依赖 | 版本 | 用途 |
 |------|------|------|
@@ -347,74 +391,3 @@ curl -X POST http://localhost:8080/vision \
 
 ---
 
-## 工作流分析
-
-### rag-chat 模块工作流
-
-```
-用户输入 → [AgentController] → [AgentServiceImpl] → [RouteAgent] 意图识别
-                                                           ├→ [KnowledgeAgent] → [RagServiceImpl] → Redis VectorStore 检索 → ChatClient 回答
-                                                           └→ [RecommendAgent] → [CourseTools] 工具调用 → ChatClient 回答
-```
-
-- **路由决策**：`RouteAgent` 根据用户问题判断意图，分发到对应的专业智能体
-- **RAG 增强**：`KnowledgeAgent` 通过 `QuestionAnswerAdvisor` 自动从知识库检索相关内容
-- **工具调用**：`RecommendAgent` 通过 `@Tool` 注解的 `CourseTools` 查询课程数据库
-- **会话记忆**：所有对话通过 `ChatMemory` 管理上下文，支持 MySQL 和 Redis 两种存储方式
-
-### speech 模块工作流
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        语音识别工作流                              │
-├─────────────────────────────────────────────────────────────────────┤
-│ 用户上传音频 → [ASR2 Controller] → [OpenAiAudioTranscriptionModel]  │
-│                                      ↓                            │
-│                            SiliconFlow API 调用                    │
-│                                      ↓                            │
-│                            返回 JSON 格式识别结果                   │
-└─────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│                        英语学习工作流                              │
-├─────────────────────────────────────────────────────────────────────┤
-│ 用户输入单词 → [EnlishController] → [GraphConfig] 编译状态图        │
-│                                      ↓                            │
-│                          [Sentence 节点] 生成英文例句               │
-│                                      ↓                            │
-│                          [Translation 节点] 翻译成中文             │
-│                                      ↓                            │
-│                          [Read 节点] 语音合成生成 MP3              │
-│                                      ↓                            │
-│                          返回 {sentence, translation, audioPath}   │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-- **状态图编排**：使用 DashScope Graph 定义节点链，编译后自动执行
-- **节点通信**：通过 `OverAllState` 传递数据，前一节点输出作为后一节点输入
-- **可视化调试**：编译时生成 PlantUML 图，便于理解工作流拓扑
-
-### see 模块工作流
-
-```
-用户上传图片 → [ImgComperhendController] 尺寸校验 → Base64 编码
-                    ↓
-            [VisionService] 构建多模态请求 → [OpenAiChatModel] 调用
-                    ↓
-                返回识别结果
-```
-
-- **安全过滤**：`SensitiveWordInterceptor` 对请求进行敏感词检测
-- **图片处理**：自动校验尺寸，支持本地文件和上传文件两种输入方式
-- **多模态调用**：将图片转为 Base64 嵌入模型请求，实现图文理解
-
----
-
-## 注意事项
-
-1. **端口冲突**：所有模块默认使用 8080 端口，同时启动多个模块时需修改配置文件中的 `server.port`
-2. **API Key 安全**：建议通过环境变量传递 API Key，避免硬编码到配置文件
-3. **语音识别兼容性**：SiliconFlow SenseVoiceSmall 模型支持 mp3、wav、m4a 等常见音频格式
-4. **向量存储**：RAG 功能依赖 Redis Vector Store，需确保 Redis 7.0+ 版本并启用向量索引
-5. **内存管理**：会话记忆默认保留最近 20 条消息，可通过配置调整
-6. **工作流调试**：英语学习工作流编译时会生成 PlantUML 图，可用于可视化调试
