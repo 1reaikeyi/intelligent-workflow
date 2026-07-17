@@ -4,17 +4,31 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/see/pom.xml" />
+        <option value="$PROJECT_DIR$/aigc/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/qwen/pom.xml" />
+        <option value="$PROJECT_DIR$/quick_qwen/pom.xml" />
+        <option value="$PROJECT_DIR$/quick-qwen/pom.xml" />
+        <option value="$PROJECT_DIR$/tool-vision/pom.xml" />
+        <option value="$PROJECT_DIR$/media/pom.xml" />
+        <option value="$PROJECT_DIR$/audio/pom.xml" />
         <option value="$PROJECT_DIR$/graph/pom.xml" />
+        <option value="$PROJECT_DIR$/vision/pom.xml" />
+        <option value="$PROJECT_DIR$/speak/pom.xml" />
+        <option value="$PROJECT_DIR$/see/pom.xml" />
         <option value="$PROJECT_DIR$/speech/pom.xml" />
+        <option value="$PROJECT_DIR$/speech2/pom.xml" />
+        <option value="$PROJECT_DIR$/硅基流动/graph/pom.xml" />
+        <option value="$PROJECT_DIR$/qwen/rag-chat/pom.xml" />
+        <option value="$PROJECT_DIR$/qwen/see/pom.xml" />
         <option value="$PROJECT_DIR$/rag-chat/pom.xml" />
         <option value="$PROJECT_DIR$/aliyun/pom.xml" />
-        <option value="$PROJECT_DIR$/local/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
-        <option value="$PROJECT_DIR$/local/pom.xml" />
+        <option value="$PROJECT_DIR$/speech2/pom.xml" />
+        <option value="$PROJECT_DIR$/visual/pom.xml" />
       </set>
     </option>
   </component>

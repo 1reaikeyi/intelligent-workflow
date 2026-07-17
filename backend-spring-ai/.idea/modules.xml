@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/backend-ai.iml" filepath="$PROJECT_DIR$/.idea/backend-ai.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/backend-spring-ai.iml" filepath="$PROJECT_DIR$/.idea/backend-spring-ai.iml" />
+      <module fileurl="file://$PROJECT_DIR$/硅基流动/graph/graph.iml" filepath="$PROJECT_DIR$/硅基流动/graph/graph.iml" />
     </modules>
   </component>
 </project>
