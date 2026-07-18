@@ -203,13 +203,6 @@ KNOWLEDGE("知识讲解智能体")  // RAG 知识问答
 - 前一节点的输出通过 `state.value()` 传递给下一节点
 - 支持 `Map<String, Object>` 格式的状态数据传递
 
-**语音能力支撑**：
-
-| 能力 | 模型 | 接口路径 |
-|------|------|----------|
-| **语音识别（ASR）** | SiliconFlow SenseVoiceSmall | `/asr`、`/asr2`、`/asr3` |
-| **语音合成（TTS）** | FunAudioLLM/CosyVoice2-0.5B | `/tts` |
-
 ---
 
 ### 3. 视觉识别工作流 — see 模块
