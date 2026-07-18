@@ -1,0 +1,23 @@
+CREATE TABLE `chat_session` (
+	`id` BIGINT(19) NOT NULL COMMENT '数据id',
+	`session_id` VARCHAR(32) NOT NULL COMMENT '会话id' COLLATE 'utf8mb4_0900_ai_ci',
+	`user_id` BIGINT(19) NOT NULL DEFAULT '0' COMMENT '用户id',
+	`title` VARCHAR(100) NULL DEFAULT NULL COMMENT '会话标题' COLLATE 'utf8mb4_bin',
+	`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+	`update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `session_id_index` (`session_id`) USING BTREE,
+	INDEX `user_id_index` (`user_id`) USING BTREE,
+	INDEX `update_time_index` (`update_time`) USING BTREE
+)COMMENT='session';
+
+CREATE TABLE `chat_record` (
+`id` BIGINT(19) NOT NULL COMMENT '数据id',
+`conversation_id` VARCHAR(100) NOT NULL COMMENT '对话id' COLLATE 'utf8mb4_bin',
+`data` TEXT NULL DEFAULT NULL COMMENT '对话数据' COLLATE 'utf8mb4_bin',
+`create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+`update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+PRIMARY KEY (`id`) USING BTREE,
+INDEX `conversation_id_index` (`conversation_id`) USING BTREE,
+INDEX `create_time_index` (`create_time`) USING BTREE
+)COMMENT='对话记录';
