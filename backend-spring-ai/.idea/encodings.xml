@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
-    <file url="file://$PROJECT_DIR$/aliyun/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/graph/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/graph/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/local/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/local/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/rag-chat/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/rag/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/see/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/see/src/main/resources/application.properties" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/speech/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/yu/src/main/java" charset="UTF-8" />
   </component>
 </project>

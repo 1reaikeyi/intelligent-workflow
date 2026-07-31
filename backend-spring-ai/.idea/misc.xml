@@ -23,10 +23,13 @@
         <option value="$PROJECT_DIR$/qwen/see/pom.xml" />
         <option value="$PROJECT_DIR$/rag-chat/pom.xml" />
         <option value="$PROJECT_DIR$/aliyun/pom.xml" />
+        <option value="$PROJECT_DIR$/yu/pom.xml" />
+        <option value="$PROJECT_DIR$/rag/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/speech/pom.xml" />
         <option value="$PROJECT_DIR$/speech2/pom.xml" />
         <option value="$PROJECT_DIR$/visual/pom.xml" />
       </set>
