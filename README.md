@@ -1,10 +1,26 @@
-# Intelligent-workflow - 智能 ，工作流
-
-基于 Spring Boot 3 + Spring AI + Graph的多功能 AI 助手后端服务平台，集成大语言模型对话、智能体路由、RAG 检索增强、工具调用、图像识别等多种 AI 能力。
+<div align="center">
+  <h1>Intelligent-workflow - 智能 ，工作流</h1>
+    <h2>基于 Spring Boot 3 + Spring AI + Graph的多功能 AI 助手后端服务平台，集成大语言模型对话、智能体路由、RAG 检索增强、工具调用、图像识别等多种 AI 能力。<h2>
+  <p>
+    <h1>配置要求</h1>
+    <img src="https://img.shields.io/badge/Java-17+ -6DB33F?style=flat-square&logo=java&logoColor=white" alt="Java" />
+    <img src="https://img.shields.io/badge/Spring%20Boot-3.+ -6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot" />
+    <img src="https://img.shields.io/badge/MySQL-8.0+ -6DB33F?style=flat-square&logo=mysql&logoColor=white" alt="mysql" />
+    <img src="https://img.shields.io/badge/Redis-7.0+ -6DB33F?style=flat-square&logo=redis&logoColor=white" alt="redis" />
+    <img src="https://img.shields.io/badge/Spring%20AI-1.1.+ -6DB33F?style=flat-square&logo=spring&logoColor=white" alt="spring ai" />
+    <img src="https://img.shields.io/badge/Vue-Node.js20.19.+ -6DB33F?style=flat-square&logo=vuedotjs&logoColor=white" alt="vue" />
+  </p>
+</div>
 
 ------
 
-# 后端介绍
+# **启动步骤**
+
+1. 创建数据库并导入 `sql/` 目录脚本。
+
+2. 修改 `start/src/main/resources/application-dev.yml` 中数据库与 Redis 配置。
+
+3. `npm run dev ` 前端启动服务。
 
 ![封面](D:说明\原型设计\2.png)
 
@@ -31,17 +47,9 @@ intelligent-workflow/
 | **see** | 敏感词过滤→图像识别→工具调用联动                             | spring-ai-starter-openai            |
 | **yu**  | 英语学习工作流（造句→翻译→语音）、ASR/TTS                    | spring-ai-alibaba-starter-dashscope |
 
-# 环境要求
-
-- JDK 17+
-- Spring Boot 3.3.8+
-- Spring AI 1.1.0+
-- DashScope Graph 1.1.0.0
-- Maven 3.8+
-- MySQL 8.0+
-- Redis 7.0+
-
 ---
+
+# 后端介绍
 
 ## 一、智能体路由模块（rag-chat）
 
@@ -1111,36 +1119,6 @@ public class ToolResultHolder {
     }
 }
 ```
-
----
-
-# 依赖说明
-
-## 智能体路由模块（rag）
-
-| 依赖 | 版本 | 功能支撑 |
-| :--- | :--- | :--- |
-| Spring Boot | 3.3.8 | 应用框架，自动配置数据源、Redis等基础设施 |
-| Spring AI | 1.1.0 | AI 能力集成框架，ChatClient、Agent 体系 |
-| MyBatis Plus | 3.5.9 | 会话记录数据 CRUD；AutoMetaObjectHandler 自动填充时间字段 |
-| Spring Boot Starter Data Redis | 3.3.8 | 会话记忆缓存、生成状态控制 |
-| Hutool All | 5.8.36 | BeanUtil 对象转换；CollStreamUtil 集合处理；IdUtil 请求ID生成 |
-
-## 视觉识别模块（see）
-
-| 依赖 | 版本 | 功能支撑 |
-| :--- | :--- | :--- |
-| Spring AI | 1.1.0 | 多模态模型调用、Media 内容嵌入 |
-| DashScope Graph | 1.1.0.0 | 状态图编排引擎，节点化工作流设计 |
-| SensitiveWord | - | 敏感词检测和过滤 |
-| Spring Boot Starter Web | 3.3.8 | MultipartFile 文件上传支持 |
-
-## 语音合成模块（yu）
-
-| 依赖 | 版本 | 功能支撑 |
-| :--- | :--- | :--- |
-| Spring AI Alibaba | 1.1.0.0 | AI 能力集成框架，ChatClient、Agent 体系 |
-| DashScope Graph | 1.1.0.0 | 状态图编排引擎 |
 
 ---
 
