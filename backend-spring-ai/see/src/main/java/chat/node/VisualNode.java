@@ -21,7 +21,7 @@ public class VisualNode implements NodeAction {
         String base64 = (String) state.value("file").orElse(("文件为空"));
         Media media = new Media(MimeTypeUtils.IMAGE_JPEG, URI.create("data:image/jpeg;base64," + base64));
         String result = result(media);
-        return Map.of("visualResult", result != null ? result : "没有识别到内容");
+        return Map.of("visualResult", result != null ? result : null);
     }
     public String result(Media media) {
         return visualClient.prompt()
