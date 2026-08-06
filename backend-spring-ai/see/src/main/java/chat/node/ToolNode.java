@@ -17,6 +17,9 @@ public class ToolNode implements NodeAction {
     public Map<String, Object> apply(OverAllState state) throws Exception {
         String question = state.value("question").toString();
         String input = state.value("visualResult").toString();
+        if (input.equals("没有识别到内容")) {
+            throw new Exception("没有识别到内容");
+        }
         PromptTemplate promptTemplate = new PromptTemplate("你负责查询"+
                 "根据信息{input}查询");
         promptTemplate.add("input", input);
