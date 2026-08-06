@@ -1,7 +1,6 @@
 <div align="center">
   <h1>Intelligent-workflow - 智能 ，工作流</h1>
     <h2>基于 Spring Boot 3 + Spring AI + Graph的多功能 AI 助手后端服务平台，集成大语言模型对话、智能体路由、RAG 检索增强、工具调用、图像识别等多种 AI 能力。<h2>
-  <p>
     <h1>配置要求</h1>
     <img src="https://img.shields.io/badge/Java-17+ -6DB33F?style=flat-square&logo=java&logoColor=white" alt="Java" />
     <img src="https://img.shields.io/badge/Spring%20Boot-3.+ -6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot" />
@@ -22,7 +21,7 @@
 
 3. `npm run dev ` 前端启动服务。
 
-![封面](D:说明\原型设计\2.png)
+![封面](D:说明/原型设计/2.png)
 
 # 项目结构
 
@@ -48,6 +47,12 @@ intelligent-workflow/
 | **yu**  | 英语学习工作流（造句→翻译→语音）、ASR/TTS                    | spring-ai-alibaba-starter-dashscope |
 
 ---
+
+# 前端功能演示
+
+| 多模态 | <img src="D:说明/原型设计/1.png" alt="封面" style="zoom:50%;" /> |
+| ------ | ------------------------------------------------------------ |
+|        |                                                              |
 
 # 后端介绍
 
@@ -76,12 +81,12 @@ intelligent-workflow/
   				  					│
    					 				▼
 				SpringUtil.getBeansOfType(Agent.class) 动态查找匹配智能体
-    											│
-    											▼
-   					 					 ROUTE → 路由失败，返回提示
-    │											 	 │                 					 │
-    ▼                                                ▼                 				     ▼
-  KNOWLEDGE → KnowledgeAgent知识问答      RECOMMEND → RecommendAgent课程推荐       其他 → 动态路由到对应智能体
+    								│
+    								▼
+   					 			 ROUTE → 路由失败，返回提示
+    │										 │                 					 │
+    ▼                                        ▼                 	    			 ▼
+  KNOWLEDGE → KnowledgeAgent知识问答    RECOMMEND → RecommendAgent课程推荐     其他 → 动态路由到对应智能体
     │   									│ ├─ VectorStore RAG检索
     └─ chatClient→ 直接对话		             └─ CourseTools @Tool注解工具调用
     
@@ -1120,14 +1125,3 @@ public class ToolResultHolder {
 }
 ```
 
----
-
-# 前端功能演示
-
-| 上传文件+输入问题 | <img src="D:说明\原型设计\1.png" alt="封面" style="zoom:50%;" /> |
-| ----------------- | ------------------------------------------------------------ |
-|                   |                                                              |
-
-
-
-------
