@@ -1,7 +1,5 @@
 package service.tools;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.NumberUtil;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import service.tools.result.Course;
 
-import java.util.Optional;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseInfo {
+public class CourseJson {
 
     @JsonPropertyDescription("课程id")
     private Long id;
@@ -30,11 +26,11 @@ public class CourseInfo {
     @JsonPropertyDescription("课程详细介绍")
     private String detail;
 
-    public static CourseInfo of(Course course) {
+    public static CourseJson of(Course course) {
         if (null == course) {
             throw new IllegalArgumentException("没有查询到数据");
         }
-        return CourseInfo.builder()
+        return CourseJson.builder()
                 .id(course.getId())
                 .name(course.getName())
                 .price(course.getPrice())

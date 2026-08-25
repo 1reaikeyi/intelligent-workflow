@@ -22,42 +22,16 @@ AI 助手后端平台，基于智能体路由 + RAG 检索增强 + StateGraph �
 
 ------
 
-# **启动步骤**
+| **启动步骤** | 创建数据库并导入 `sql/` 目录脚本。 修改 `start/src/main/resources/application-dev.yml` 中数据库与 Redis 配置。 `npm run dev ` 前端启动服务。 |
+| ------------ | ------------------------------------------------------------ |
+| 项目结构     | intelligent-workflow/<br/>├── backend-spring-ai/                    <br/>│   ├── rag/                              # 智能体路由 & RAG 检索模块<br/>│   ├── see/                              # 视觉识别模块<br/>│   └── yu/                               # 语音合成模块<br/>├── frontend-vue-ai/                  # 前端代码（Vue 3）<br/>├── database-sql/                     # 数据库脚本目录<br/>│   ├── sql.txt                       # 数据库初始化SQL<br/>│   └── 数据库设计文档.md               # 完整的数据库设计说明<br/>└── 说明 |
 
-1. 创建数据库并导入 `sql/` 目录脚本。
-
-2. 修改 `start/src/main/resources/application-dev.yml` 中数据库与 Redis 配置。
-
-3. `npm run dev ` 前端启动服务。
-
-| see+yu模块                                                   | rag模块                                                      | see+yu模块                                                   | 待实现                                                       |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="说明/graph流程图/链式.jpg" alt="链式" style="zoom:25%;" /> | <img src="说明/graph流程图/路由.jpg" alt="路由" style="zoom:25%;" /> | <img src="说明/graph流程图/平行.jpg" alt="平行" style="zoom:25%;" /> | <img src="说明/graph流程图/思考.jpg" alt="思考" style="zoom:25%;" /> |
-
-
-
-# 项目结构
-
-```
-intelligent-workflow/
-├── backend-spring-ai/                    
-│   ├── rag/                              # 智能体路由 & RAG 检索模块
-│   ├── see/                              # 视觉识别模块
-│   └── yu/                               # 语音合成模块
-├── frontend-vue-ai/                  # 前端代码（Vue 3）
-├── database-sql/                     # 数据库脚本目录
-│   ├── sql.txt                       # 数据库初始化SQL
-│   └── 数据库设计文档.md               # 完整的数据库设计说明
-└── 说明
-```
-
-# 功能架构总览
-
-| 模块    | 核心功能                                                     | 技术要点                            |
-| :------ | :----------------------------------------------------------- | :---------------------------------- |
-| **rag** | Agent 智能体路由、RAG 检索、工具调用、会话管理、流式输出中断 | spring-ai-starter-openai            |
-| **see** | 敏感词过滤→图像识别→工具调用联动                             | spring-ai-starter-openai            |
-| **yu**  | 英语学习工作流（造句→翻译→语音）、ASR/TTS                    | spring-ai-alibaba-starter-dashscope |
+| 模块    | 核心功能                                                     | 技术要点                            |                                                              |
+| :------ | :----------------------------------------------------------- | :---------------------------------- | ------------------------------------------------------------ |
+| **see** | 敏感词过滤→图像识别→工具调用联动                             | spring-ai-starter-openai            | <img src="说明/graph流程图/链式.jpg" alt="链式" style="zoom:25%;" /> |
+| **rag** | Agent 智能体路由、RAG 检索、工具调用、会话管理、流式输出中断 | spring-ai-starter-openai            | <img src="说明/graph流程图/路由.jpg" alt="路由" style="zoom:25%;" /> |
+| **yu**  | 英语学习工作流（造句→翻译→语音）、ASR/TTS                    | spring-ai-alibaba-starter-dashscope | <img src="说明/graph流程图/平行.jpg" alt="平行" style="zoom:25%;" /> |
+|         | 待实现                                                       |                                     | <img src="说明/graph流程图/思考.jpg" alt="思考" style="zoom:25%;" /> |
 
 ---
 
@@ -71,44 +45,95 @@ intelligent-workflow/
 
 ## 一、智能体路由 RAG 模块-rag
 
-## 需求阶段
-
-传统 AI 对话服务耦合闲聊、知识库、业务工具查询逻辑，新增业务场景需要修改核心对话 Controller，扩展性差；用户提问混杂多种意图（查知识库、查课程数据、普通闲聊），LLM 无法自动分流；多轮对话需要会话记忆留存上下文，流式输出支持前端随时中断停止；工具调用返回的结构化数据需要透传到前端渲染。
-
-1. 单 ChatClient 统一处理全部请求，意图识别、业务处理逻辑耦合在一处；
-2. 路由意图识别复用全局带记忆 ChatClient，历史会话干扰意图判断，路由识别不准；
-3. 无统一生成状态管控，前端点击停止后后端 LLM 仍持续消耗 token、浪费资源；
-4. 工具调用结果隔离在服务内部，前端无法获取结构化工具返回数据；
-5. 会话记忆仅单存储方案，无法适配高并发缓存 / 长期持久化两种业务需求。
-
 ## 策略流程链路
 
-```
-【完整对话请求链路】
-前端传参 question+sessionId → AgentController.chat() → AgentServiceImpl.chat()
-    1. 调用独立RouteAgent意图识别（无记忆专用routeChatClient）
-    2. 清洗路由返回文本、解析AgentTypeEnum智能体标识
-    3. SpringUtil动态扫描所有Agent实现类，匹配对应业务智能体
-    ├─ 匹配KNOWLEDGE → KnowledgeAgent（纯RAG知识库问答，无工具）
-    ├─ 匹配RECOMMEND → RecommendAgent（RAG向量检索+@Tool课程工具调用）
-    ├─ 匹配ROUTE/无匹配 → 返回兜底提示文本
-    4. 执行目标Agent.processStream()返回Flux流式事件流
-        4.1 Redis Hash写入GENERATE_STATUS_KEY标记会话正在生成
-        4.2 Reactor流式逐块返回文本DATA事件
-        4.3 前端触发stop接口 → 删除Redis状态标识，takeWhile终止流
-        4.4 流结束时读取ToolResultHolder工具结构化数据，封装PARAM事件返回前端
-        4.5 会话取消/完成自动清理Redis生成标记，保存中断对话历史
+```mermaid
+flowchart TD
+    %% ==================== 样式定义 ====================
+    classDef fe fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px;
+    classDef ctrl fill:#bbdefb,stroke:#1565c0,stroke-width:2px;
+    classDef svc fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+    classDef ag fill:#ffecb3,stroke:#f57f17,stroke-width:2px;
+    classDef rd fill:#ffccbc,stroke:#bf360c,stroke-width:2px;
+    classDef llm fill:#b2ebf2,stroke:#006064,stroke-width:2px;
 
-【停止生成流程】
-前端调用stop(sessionId) → RouteAgent.stop() → 删除Redis会话生成状态HashKey
-流takeWhile判断key不存在，直接终止LLM调用，释放资源
+    %% ==================== 1. 完整对话请求链路 ====================
+    subgraph MAIN ["【完整对话请求链路】"]
+        direction TB
+        Start(("前端传参<br/>question + sessionId")):::fe
+        
+        C1["AgentController.chat()"]:::ctrl
+        C2["AgentServiceImpl.chat()"]:::svc
+        
+        S1["1. 调用独立RouteAgent意图识别<br/>(无记忆专用routeChatClient)"]:::svc
+        S2["2. 清洗路由返回文本<br/>解析AgentTypeEnum智能体标识"]:::svc
+        S3["3. SpringUtil动态扫描所有Agent实现类<br/>匹配对应业务智能体"]:::svc
+        
+        subgraph MATCH ["智能体路由匹配"]
+            direction TB
+            M1["KNOWLEDGE → KnowledgeAgent<br/>（纯RAG知识库问答，无工具）"]:::ag
+            M2["RECOMMEND → RecommendAgent<br/>（RAG向量检索 + @Tool课程工具调用）"]:::ag
+            M3["ROUTE / 无匹配 → 返回兜底提示文本"]:::ag
+        end
+        
+        S4["4. 执行目标Agent.processStream()<br/>返回Flux流式事件流"]:::svc
+        
+        subgraph FLUX ["Flux 流式事件处理细节"]
+            direction TB
+            F1["4.1 Redis Hash写入<br/>GENERATE_STATUS_KEY（标记生成中）"]:::rd
+            F2["4.2 Reactor流式逐块<br/>返回文本DATA事件"]:::llm
+            F3["4.3 前端stop → 删除Redis标识<br/>takeWhile终止流"]:::rd
+            F4["4.4 流结束读取ToolResultHolder<br/>封装PARAM结构化事件返回前端"]:::ag
+            F5["4.5 会话取消/完成 → 自动清理Redis标记<br/>保存中断对话历史"]:::rd
+        end
+        
+        %% 主链路连线
+        Start --> C1 --> C2 --> S1 --> S2 --> S3
+        S3 --> M1
+        S3 --> M2
+        S3 --> M3
+        M1 --> S4
+        M2 --> S4
+        M3 --> S4
+        S4 --> F1 --> F2
+        F2 -->|流正常结束| F4 --> F5
+        
+        %% 流内中断连线
+        F2 -.->|前端stop触发| F3
+        F3 -.->|takeWhile终止| F2
+    end
 
-【单智能体内部执行模板（AbstractAgent抽象统一封装）】
-1. 生成全局唯一requestId绑定单次请求；
-2. 构建ChatRequest：注入系统提示词、工具列表、RAG检索Advisor、工具上下文；
-3. 流式调用LLM，逐块封装ChatEventVO事件；
-4. 完成后读取本次请求全部工具调用结果，追加结构化参数事件；
-5. 统一处理会话记忆读写、中断兜底记录。
+    %% ==================== 2. 停止生成流程 ====================
+    subgraph STOP_FLOW ["【停止生成流程】"]
+        direction LR
+        SS(("前端调用<br/>stop(sessionId)")):::fe
+        SC["RouteAgent.stop()"]:::ctrl
+        SD["删除Redis会话生成状态HashKey"]:::rd
+        ST["takeWhile判断key不存在<br/>直接终止LLM调用，释放资源"]:::llm
+        
+        SS --> SC --> SD --> ST
+    end
+
+    %% ==================== 3. 单智能体内部执行模板 ====================
+    subgraph ABSTRACT ["【单智能体内部执行模板 (AbstractAgent抽象封装)】"]
+        direction TB
+        A1["1. 生成全局唯一requestId，绑定单次请求"]:::ag
+        A2["2. 构建ChatRequest<br/>注入：系统提示词 / 工具列表 / RAG检索Advisor / 工具上下文"]:::ag
+        A3["3. 流式调用LLM<br/>逐块封装ChatEventVO事件"]:::llm
+        A4["4. 完成后读取本次请求全部工具调用结果<br/>追加结构化参数事件"]:::ag
+        A5["5. 统一处理会话记忆读写、中断兜底记录"]:::ag
+        
+        A1 --> A2 --> A3 --> A4 --> A5
+    end
+
+    %% ==================== 跨模块关联 ====================
+    %% 业务智能体基于抽象模板执行
+    M1 -.-o|继承并执行业务| A1
+    M2 -.-o|继承并执行业务| A1
+    
+    %% 停止流程与主链路的交互
+    F3 -.->|调用| SD
+    ST -.->|中断信号| F2
 ```
 
 ## 组件设计
@@ -218,36 +243,72 @@ Q：AbstractAgent 模板方法模式的设计价值？
 
 答：将流式封装、Redis 状态、会话记忆、事件组装、中断兜底全部抽取到抽象父类，所有业务智能体无需重复编写流式、中断、记忆样板代码；子类仅聚焦自身业务提示词、工具、RAG 配置，代码复用率高，统一管控异常、日志、资源释放。
 
-## 二、视觉识别多模态模块（see）
-
-## 需求阶段
-
-需求背景
-
-支持用户上传图片识别图片内物体，联动业务工具查询匹配商品；图片存在超大尺寸、违规敏感内容风险；识别流程多步骤（文件校验→转 Base64→视觉 LLM 识别→工具查询）硬编码串联，流程无法调整；同时兼容本地文件、前端上传二进制文件两种输入来源。
-
-1. 图片尺寸过大导致视觉模型调用超时、OOM；
-2. 用户输入提问包含敏感词，直接送入 LLM 存在合规风险；
-3. 识别与工具查询串行代码写死在 Controller，无法增减步骤、无流程可视化；
-4. 图片二进制跨方法传递繁琐，文件路径多环境不兼容；
-5. 识别失败无分支兜底，直接空参数进入工具查询产生无效 DB 请求。
+## 二、视觉识别多模态（see）
 
 ## 策略流程链路
 
-```
-【图片识别完整链路】
-前端上传图片+文字提问 → ImgComperhendController
-    1. 文件前置校验：图片最大尺寸2048*2048，限制文件格式
-    2. SensitiveWordInterceptor拦截检测提问文本敏感词，命中直接返回400拦截
-    3. 文件统一转Base64编码（本地File/上传byte[]两套转换方法）
-    4. 组装Media多模态对象送入StateGraph编译工作流
-        node1 VisualNode（异步视觉识别）：返回visualResult识别文本存入全局状态
-        node2 ToolNode（异步工具查询）：读取visualResult关键词检索业务商品
-    5. 收集graph全部state数据（识别结果+匹配商品）统一返回前端
+```mermaid
+flowchart TD
+    %% ==================== 样式定义 ====================
+    classDef fe fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px;
+    classDef ctrl fill:#bbdefb,stroke:#1565c0,stroke-width:2px;
+    classDef check fill:#ffccbc,stroke:#bf360c,stroke-width:2px;
+    classDef util fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+    classDef node fill:#ffecb3,stroke:#f57f17,stroke-width:2px;
+    classDef state fill:#b2ebf2,stroke:#006064,stroke-width:2px;
+    classDef ret fill:#d1c4e9,stroke:#4a148c,stroke-width:2px;
 
-【单节点执行逻辑】
-VisualNode：Base64封装Image Media，调用独立visualChatClient识别图像内容，结果写入state；
-ToolNode：读取state内visualResult，调用业务工具检索数据，写入toolResult。
+    %% ==================== 主链路 ====================
+    Start(("前端上传图片 + 文字提问")):::fe
+    C["ImgComperhendController"]:::ctrl
+
+    subgraph CHAIN ["【图片识别完整链路】"]
+        direction TB
+        S1["1. 文件前置校验<br/>图片最大尺寸 2048×2048<br/>限制文件格式"]:::check
+        S2["2. SensitiveWordInterceptor 拦截检测<br/>提问文本敏感词 → 命中直接返回 400 拦截"]:::check
+        S3["3. 文件统一转 Base64 编码<br/>(本地 File / 上传 byte[] 两套转换方法)"]:::util
+        S4["4. 组装 Media 多模态对象<br/>送入 StateGraph 编译工作流"]:::util
+
+        subgraph GRAPH ["StateGraph 工作流 (异步节点)"]
+            direction TB
+            G1["node1 · VisualNode (异步视觉识别)<br/>Base64 封装 Image Media<br/>调用独立 visualChatClient 识别图像内容<br/>→ visualResult 识别文本写入全局 state"]:::node
+            G2["node2 · ToolNode (异步工具查询)<br/>读取 state.visualResult 关键词<br/>调用业务工具检索商品<br/>→ toolResult 写入全局 state"]:::node
+            ST[("全局 State<br/>{visualResult, toolResult}")]:::state
+        end
+
+        S5["5. 收集 graph 全部 state 数据<br/>(识别结果 + 匹配商品) 统一返回前端"]:::ret
+    end
+
+    End(("前端接收统一响应")):::fe
+
+    %% ==================== 主链路连线 ====================
+    Start --> C --> S1 --> S2 --> S3 --> S4
+    S4 --> G1 --> ST
+    G1 --> G2
+    G2 --> ST
+    ST --> S5 --> End
+
+    %% ==================== 单节点执行逻辑 ====================
+    subgraph NODELOGIC ["【单节点执行逻辑】"]
+        direction TB
+        V["VisualNode"]:::node
+        V1["① 读取 Base64 图像"]:::util
+        V2["② 封装 Image Media 多模态对象"]:::util
+        V3["③ 调用独立 visualChatClient 识别图像内容"]:::node
+        V4["④ 识别文本 → visualResult 写入 state"]:::state
+
+        T["ToolNode"]:::node
+        T1["① 读取 state.visualResult"]:::state
+        T2["② 提取关键词检索业务商品"]:::util
+        T3["③ 调用业务 @Tool 工具查询"]:::node
+        T4["④ 检索数据 → toolResult 写入 state"]:::state
+    end
+
+    %% 节点逻辑归属连线
+    G1 -.-o|实现| V
+    G2 -.-o|实现| T
+    V --> V1 --> V2 --> V3 --> V4
+    T --> T1 --> T2 --> T3 --> T4
 ```
 
 ## 组件设计
@@ -296,18 +357,7 @@ Q：视觉识别为什么单独一套 visualChatClient，不共用对话客户�
 
 答：通用对话 ChatClient 加载文本对话相关提示词、记忆、文本工具，视觉模型入参格式、系统提示完全独立，拆分专用客户端隔离配置，避免参数冲突，职责单一。
 
-## 三、英语学习语音工作流模块（yu）
-
-## 需求阶段
-
-需求背景
-
-用户输入英文单词，完整串联「单词造句→中文翻译→文本转语音 MP3」三步 AI 任务；多步骤存在前后依赖（造句结果作为翻译输入，翻译文本作为语音输入）；步骤硬编码耦合，新增释义、例句拓展步骤无法灵活调整；音频文件本地存储路径混乱，重复生成占用磁盘。
-
-1. 步骤强依赖串行代码，流程固化无法调整；
-2. 各节点数据无法互通，需要手动传参拼接，代码冗余；
-3. TTS 语音生成全量加载文本，长句内存溢出；
-4. 音频文件无统一命名规范，重复生成堆积磁盘。
+## 三、英语学习语音工作流（yu）
 
 ## 策略流程链路
 
@@ -345,16 +395,6 @@ Q：同步串行调用和 StateGraph 异步节点执行的区别？
 
 ## 四、ASR 语音转写 & TTS 语音合成模块
 
-## 需求阶段
-
-需求背景
-
-支持音频文件上传转文字（ASR）、文本生成语音 MP3（TTS）；音频格式多样 mp3/wav/m4a；大音频文件全量加载内存溢出；二进制音频跨服务传递复杂；TTS 一次性合成内存占用高。
-
-1. 音频格式硬编码仅支持 mp3，其他格式转写失败；
-2. 大音频读取全量 byte 数组堆内存溢出；
-3. TTS 一次性拉取完整音频数据，长文本内存峰值高。
-
 ## 策略流程链路
 
 ```
@@ -379,30 +419,4 @@ MultipartFile音频上传 → ASRServiceImpl
 |      大音频全量加载内存溢出      | 数十 MB 音频一次性读取全部 byte 占用堆内存 | 流式 Base64 编码，按需读取文件字节，不缓存完整文件 |   降低内存峰值，支持大体积音频转写，规避 OOM 崩溃    |
 |    TTS 长文本一次性合成内存高    |    长篇对话文本合成完整音频占用大量内存    |   调用 stream 流式接口逐块获取音频分片，循环合并   |     分片流式处理，内存占用稳定，不受文本长度影响     |
 |    音频二进制跨节点传递不兼容    |           文件路径多实例不可访问           |     Base64 编码作为文本传输，统一模型入参标准      |  二进制文本化传输，跨服务、跨节点无文件路径兼容问题  |
-
-## 五、整体优化迭代
-
-1. 意图识别路由耦合问题
-
-   初期共用全局带记忆 ChatClient 做路由，历史上下文干扰意图判断；拆分独立无记忆 routeChatClient，路由准确率大幅提升。
-
-2. 流式生成无中断管控，token 浪费
-
-   无分布式状态标记，前端停止后 LLM 持续运行；引入 Redis Hash 全局生成开关，前端停止请求立刻终止流，大幅降低模型调用成本。
-
-3. 多步骤 AI 任务硬编码串行，扩展性差
-
-   视觉、英语学习流程全部写死 Service 内部；重构为 StateGraph 节点化编排，流程可视化、新增步骤零侵入核心代码。
-
-4. 会话记忆单 MySQL 存储，并发性能差
-
-   高峰期对话接口查询数据库延迟高；新增 Redis 缓存实现，环境配置切换，读写性能提升 10 倍以上。
-
-5. 图片 / 音频格式硬编码，兼容性不足
-
-   仅支持 mp3/jpg 格式，其他文件报错；自动截取文件后缀动态识别格式，兼容多类型媒体文件。
-
-6. 工具调用结果无法透传前端
-
-   结构化课程数据仅内部使用，前端无法展示；新增 ThreadLocal 工具结果容器，流式结束封装独立事件返回结构化数据。
 

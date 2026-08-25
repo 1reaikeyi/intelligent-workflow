@@ -9,7 +9,7 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import service.tools.CourseTools;
+import service.tools.CourseToolResult;
 import start.config.SystemPromptConfig;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class RecommendAgent extends AbstractAgent {
 
     private final SystemPromptConfig systemPromptConfig;
     private final VectorStore vectorStore;
-    private final CourseTools courseTools;
+    private final CourseToolResult courseToolResult;
 
     // 注入默认的 ChatClient（带记忆功能）
     @Qualifier("chatClient")
@@ -42,7 +42,7 @@ public class RecommendAgent extends AbstractAgent {
 
     @Override
     public Object[] tools() {
-        return new Object[]{this.courseTools};
+        return new Object[]{this.courseToolResult};
     }
 
     @Override
