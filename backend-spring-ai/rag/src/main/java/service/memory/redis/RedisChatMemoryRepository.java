@@ -15,16 +15,16 @@ import java.util.List;
 import java.util.Set;
 @Service
 @Profile("redis")
-public class RedisChatMemoryReposity implements ChatMemoryRepository {
+public class RedisChatMemoryRepository implements ChatMemoryRepository {
     private static final String DEFAULT_PREFIX = "chat:";
     private final String prefix;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    public RedisChatMemoryReposity() {
+    public RedisChatMemoryRepository() {
         this(DEFAULT_PREFIX);
     }
-    public RedisChatMemoryReposity(String prefix) {
+    public RedisChatMemoryRepository(String prefix) {
         this.prefix = prefix;
     }
 

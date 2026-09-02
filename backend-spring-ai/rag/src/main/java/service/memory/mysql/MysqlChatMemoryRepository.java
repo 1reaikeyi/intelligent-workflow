@@ -1,13 +1,9 @@
 package service.memory.mysql;
 
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import model.entity.ChatRecord;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +15,7 @@ import java.util.List;
 
 @Service
 @Profile("mysql")
-public class MysqlChatMemoryReposity implements ChatMemoryRepository {
+public class MysqlChatMemoryRepository implements ChatMemoryRepository {
     @Autowired
     private ChatRecordService chatRecordService;
     @Override
@@ -53,9 +49,8 @@ public class MysqlChatMemoryReposity implements ChatMemoryRepository {
 
     @Override
     public void deleteByConversationId(String sessionId) {
-        var queryWrapper = Wrappers.<ChatRecord>lambdaQuery()
-                .eq(ChatRecord::getSessionId, sessionId);
-        this.chatRecordService.remove(queryWrapper);
+        chatRecordService.remove(new LambdaUpdateWrapper<ChatRecord>()
+                .eq(ChatRecord::getSessionId, sessionId));
     }
 
 }

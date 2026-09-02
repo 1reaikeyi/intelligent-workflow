@@ -70,16 +70,14 @@ public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> impl
      */
     @Override
     public List<MessageVO> queryBySessionId(String sessionId) {
-//        // 根据会话ID获取对话ID
+        // 根据会话ID获取对话ID ,从chatmemory中获取历史消息
         String conversationId = ChatService.getConversationId(sessionId);
-//        // 从chatmemory中获取历史消息
+        //message是springai的内部类
         List<Message> messageList = chatMemory.get(conversationId);
         // 过滤并转换消息列表
         return StreamUtil.of(messageList)
                 // 过滤掉非用户消息和助手消息
                 .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
-                // 转换为MessageVO对象
-                // 转换为MessageVO对象
                 .map(message -> {
                     if (message instanceof AssistantMessageUtil) {
                         return MessageVO.builder()
@@ -88,6 +86,7 @@ public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> impl
                                 .params(((AssistantMessageUtil) message).getParams())
                                 .build();
                     }
+                    //if (message instanceof USERMessageUtil) {}
                     return MessageVO.builder()
                             .content(message.getText())
                             .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
