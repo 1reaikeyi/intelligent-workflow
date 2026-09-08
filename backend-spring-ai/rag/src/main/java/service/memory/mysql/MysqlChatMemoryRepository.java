@@ -16,8 +16,10 @@ import java.util.List;
 @Service
 @Profile("mysql")
 public class MysqlChatMemoryRepository implements ChatMemoryRepository {
+
     @Autowired
     private ChatRecordService chatRecordService;
+
     @Override
     public List<String> findConversationIds() {
         var chatRecordList = chatRecordService.lambdaQuery()
