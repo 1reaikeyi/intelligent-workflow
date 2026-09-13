@@ -51,7 +51,7 @@ public class CreateVector {
         log.info("保存到向量数据库中，消息数据：{}", texts);
         log.info("段落切分后保存到向量数据库，文档数量：{}", documents.size());
     }
-//    public void createWithSemanticSplitting(List<String> texts) {
+    public void createWithSemanticSplitting(List<String> texts) {
 //        List<Document> documents = new ArrayList<>();
 //        TextSplitter textSplitter = new TokenTextSplitter(500, 50); // 500 tokens per chunk, 50 tokens overlap
 //
@@ -69,5 +69,5 @@ public class CreateVector {
 //
 //        vectorStore.add(documents);
 //        log.info("语义切分后保存到向量数据库，文档数量：{}", documents.size());
-//    }
+    }
 }

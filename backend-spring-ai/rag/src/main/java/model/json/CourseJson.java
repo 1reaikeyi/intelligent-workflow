@@ -1,11 +1,11 @@
-package service.tools;
+package model.json;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import service.tools.result.Course;
+import model.entity.Course;
 
 @Data
 @Builder

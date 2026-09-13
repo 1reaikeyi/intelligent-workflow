@@ -1,4 +1,4 @@
-package service.chat;
+package service.rag;
 
 import model.vo.ChatEventVO;
 import reactor.core.publisher.Flux;

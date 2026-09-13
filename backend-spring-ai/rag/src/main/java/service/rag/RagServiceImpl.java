@@ -1,30 +1,34 @@
-package service.chat;
+package service.rag;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
-import start.constants.Constant;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import service.SessionService;
-import service.tools.ToolResultHolder;
+import service.chat.ChatService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class ToolServiceImpl implements ToolService{
-    //src/main/java/start/config/ToolConfiguratioon.java::toolClient
-    @Resource(name = "toolClient")
-    private ChatClient toolClient;
+@Slf4j
+public class RagServiceImpl implements RagService {
+    //src/main/java/start/config/RagConfiguratioon.java::ragClient
+    @Resource(name = "ragClient")
+    private ChatClient ragClient;
     @Autowired
     private SystemPromptConfig systemPromptConfig;
     @Autowired
@@ -33,12 +37,10 @@ public class ToolServiceImpl implements ToolService{
     private ChatMemory chatMemory;
     @Autowired
     private SessionService sessionService;
+    @Autowired
+    private VectorStore vectorStore;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
-    // 输出结束的标记
-    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder()
-                                .eventType(ChatEventTypeEnum.STOP.getValue())
-                                .build();
     /**
      * chat
      *
@@ -53,22 +55,54 @@ public class ToolServiceImpl implements ToolService{
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
-        // 生成请求id
-        var requestId = IdUtil.fastSimpleUUID();
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
-        return toolClient.prompt()
-                .user(question)
+        // 创建RAG增强
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(question)
+                .similarityThreshold(0.6d)
+                .topK(6)
+                .build();
+        List<Document> retrievedDocs = vectorStore.similaritySearch(searchRequest);
+
+        if (!retrievedDocs.isEmpty() &&
+                retrievedDocs.get(0).getScore() >= 0.6d) {
+            log.warn("RAG未命中, question={}, sessionId={}", question, sessionId);
+            return Flux.just(
+                    ChatEventVO.builder()
+                            .eventData("抱歉，知识库中未找到相关信息，无法回答。")
+                            .eventType(ChatEventTypeEnum.DATA.getValue())
+                            .build(),
+                    ChatEventVO.builder()
+                            .eventType(ChatEventTypeEnum.STOP.getValue())
+                            .build()
+            );
+        }
+//        if (hit) {}
+        log.info("RAG命中, question={}, 召回数={}, top1分数={}",
+                question, retrievedDocs.size(), retrievedDocs.get(0).getScore());
+
+        String context = retrievedDocs.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n---\n"));
+
+        return ragClient.prompt()
+                .user(u -> u.text("""
+                        请根据以下参考上下文回答问题。如果上下文中没有答案，请明确说"不知道"。
+                        ## 参考上下文
+                        %s
+                        ## 问题
+                        %s
+                        """
+                        .formatted(context, question)))
+
                 .advisors(advisorSpec -> advisorSpec
-                        //会话记忆
-                        .param(ChatMemory.CONVERSATION_ID, conversationId))
+                            //会话记忆
+                            .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .system(promptSystemSpec -> promptSystemSpec
-                        //系统role
                         .text(systemPromptConfig.getChatSystemMessage().get())
-                        //param = 参数
                         .param("now", LocalDateTime.now())
                 )
-                .toolContext(Map.of(Constant.REQUEST_ID, requestId)) //通过工具上下文传递参数
                 .stream()
                 .chatResponse()
                 // 第一次输出内容时执行
@@ -77,45 +111,24 @@ public class ToolServiceImpl implements ToolService{
                 .doFirst(() -> outputHash.put(sessionId, "true"))  // 将布尔值转换为字符串存入 Redis
                 .doOnError(throwable -> outputHash.delete(sessionId))
                 .doOnComplete(() -> outputHash.delete(sessionId))
-                //(2)stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doOnCancel(() -> {
+                    // 当输出被取消时，保存输出的内容到历史记录中
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
                 //控制是否继续
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
-
                 .map(chatResponse -> {
-                    // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
-                    // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
-                    // 从而解决，在历史聊天记录中没有外参数的问题
-                    var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
-                    if (StrUtil.equals(Constant.STOP, finishReason)) {
-                        var messageId = chatResponse.getMetadata().getId();
-                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
-                    }
                     String response = chatResponse.getResult().getOutput().getText();
-                    // (3)追加到输出内容中
+                    // 追加到输出内容中
                     outputBuilder.append(response);
                     ChatEventVO chatEventVO = ChatEventVO.builder()
                             .eventData(response)
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
                     return chatEventVO;})
-
-                .concatWith(Flux.defer(() -> {
-                    // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
-                    var map = ToolResultHolder.get(requestId);
-                    if (!map.isEmpty()) {
-                        ToolResultHolder.remove(requestId); // 清除参数列表
-                        // 响应给前端的参数数据
-                        var chatEventVO = ChatEventVO.builder()
-                                .eventData(map)
-                                .eventType(ChatEventTypeEnum.PARAM.getValue())
-                                .build();
-                        return Flux.just(chatEventVO, STOP_EVENT);
-                    }
-                    return Flux.just(STOP_EVENT);
-                }));
+                .concatWith(Flux.just(ChatEventVO.builder().
+                        eventType(ChatEventTypeEnum.STOP.getValue())
+                        .build()));
     }
     /**
      * 保存停止输出的记录

@@ -1,21 +1,19 @@
 package service.tools;
 
 import lombok.extern.slf4j.Slf4j;
+import model.json.CourseJson;
 import start.constants.Constant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import service.tools.result.CourseService;
 
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class CourseToolResult {
+public class CourseTool {
     @Autowired
     private  CourseService courseService;
     private static final String FIELD_NAME_FORMAT = "{}_{}";  // 提取格式字符串常量

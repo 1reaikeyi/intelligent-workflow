@@ -1,14 +1,15 @@
-package service.chat;
+package service.tools;
 
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import service.chat.ChatService;
+import start.constants.Constant;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -17,12 +18,13 @@ import service.SessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Service
-public class RagServiceImpl implements RagService{
-    //src/main/java/start/config/RagConfiguratioon.java::ragClient
-    @Resource(name = "ragClient")
-    private ChatClient ragClient;
+public class ToolServiceImpl implements ToolService {
+    //src/main/java/start/config/ToolConfiguratioon.java::toolClient
+    @Resource(name = "toolClient")
+    private ChatClient toolClient;
     @Autowired
     private SystemPromptConfig systemPromptConfig;
     @Autowired
@@ -31,10 +33,12 @@ public class RagServiceImpl implements RagService{
     private ChatMemory chatMemory;
     @Autowired
     private SessionService sessionService;
-    @Autowired
-    private VectorStore vectorStore;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
+    // 输出结束的标记
+    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder()
+                                .eventType(ChatEventTypeEnum.STOP.getValue())
+                                .build();
     /**
      * chat
      *
@@ -49,24 +53,22 @@ public class RagServiceImpl implements RagService{
         var outputBuilder = new StringBuilder();
         //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
+        // 生成请求id
+        var requestId = IdUtil.fastSimpleUUID();
         //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
-        // 创建RAG增强
-        var qaAdvisor = QuestionAnswerAdvisor.builder(vectorStore)
-                .searchRequest(SearchRequest.builder().similarityThreshold(0.6d).topK(6).build())
-                .build();
-
-        return ragClient.prompt()
+        return toolClient.prompt()
                 .user(question)
                 .advisors(advisorSpec -> advisorSpec
-                            // 设置RAG增强
-                            .advisors(qaAdvisor)
-                            //会话记忆
-                            .param(ChatMemory.CONVERSATION_ID, conversationId))
+                        //会话记忆
+                        .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .system(promptSystemSpec -> promptSystemSpec
+                        //系统role
                         .text(systemPromptConfig.getChatSystemMessage().get())
+                        //param = 参数
                         .param("now", LocalDateTime.now())
                 )
+                .toolContext(Map.of(Constant.REQUEST_ID, requestId)) //通过工具上下文传递参数
                 .stream()
                 .chatResponse()
                 // 第一次输出内容时执行
@@ -75,25 +77,45 @@ public class RagServiceImpl implements RagService{
                 .doFirst(() -> outputHash.put(sessionId, "true"))  // 将布尔值转换为字符串存入 Redis
                 .doOnError(throwable -> outputHash.delete(sessionId))
                 .doOnComplete(() -> outputHash.delete(sessionId))
-                //(2)stop时仍然输出
+                //(2)stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doOnCancel(() -> {
-                    // 当输出被取消时，保存输出的内容到历史记录中
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
                 //控制是否继续
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
+
                 .map(chatResponse -> {
+                    // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
+                    // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
+                    // 从而解决，在历史聊天记录中没有外参数的问题
+                    var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
+                    if (StrUtil.equals(Constant.STOP, finishReason)) {
+                        var messageId = chatResponse.getMetadata().getId();
+                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
+                    }
                     String response = chatResponse.getResult().getOutput().getText();
-                    // 追加到输出内容中
+                    // (3)追加到输出内容中
                     outputBuilder.append(response);
                     ChatEventVO chatEventVO = ChatEventVO.builder()
                             .eventData(response)
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
                     return chatEventVO;})
-                .concatWith(Flux.just(ChatEventVO.builder().
-                        eventType(ChatEventTypeEnum.STOP.getValue())
-                        .build()));
+
+                .concatWith(Flux.defer(() -> {
+                    // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
+                    var map = ToolResultHolder.get(requestId);
+                    if (!map.isEmpty()) {
+                        ToolResultHolder.remove(requestId); // 清除参数列表
+                        // 响应给前端的参数数据
+                        var chatEventVO = ChatEventVO.builder()
+                                .eventData(map)
+                                .eventType(ChatEventTypeEnum.PARAM.getValue())
+                                .build();
+                        return Flux.just(chatEventVO, STOP_EVENT);
+                    }
+                    return Flux.just(STOP_EVENT);
+                }));
     }
     /**
      * 保存停止输出的记录

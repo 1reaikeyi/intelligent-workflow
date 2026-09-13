@@ -1,4 +1,4 @@
-package service.tools.result;
+package model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;

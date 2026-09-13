@@ -1,7 +1,8 @@
-package service.tools.result;
+package service.tools;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import mapper.CourseMapper;
+import model.entity.Course;
 import org.springframework.stereotype.Service;
 
 @Service

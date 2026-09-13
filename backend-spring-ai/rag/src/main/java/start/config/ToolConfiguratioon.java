@@ -6,7 +6,7 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import service.tools.CourseToolResult;
+import service.tools.CourseTool;
 
 @Configuration
 public class ToolConfiguratioon {
@@ -17,10 +17,10 @@ public class ToolConfiguratioon {
     public ChatClient toolClient(OpenAiChatModel model,
                                  @Qualifier("loggerAdvisor") Advisor loggerAdvisor,
                                  @Qualifier("messageWindowAdvisor") Advisor messageWindowAdvisor,
-                                 CourseToolResult courseToolResult) {  // 日志记录器
+                                 CourseTool courseTool) {  // 日志记录器
         return ChatClient.builder(model)
                 .defaultAdvisors(loggerAdvisor, messageWindowAdvisor) //添加 Advisor 功能增强
-                .defaultTools(courseToolResult)
+                .defaultTools(courseTool)
                 .build();
     }
 }

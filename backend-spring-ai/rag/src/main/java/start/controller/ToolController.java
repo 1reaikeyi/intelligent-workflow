@@ -3,11 +3,10 @@ package start.controller;
 import jakarta.annotation.Resource;
 import model.dto.ChatDTO;
 import model.vo.ChatEventVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import service.chat.ToolService;
+import service.tools.ToolService;
 
 @RestController
 @RequestMapping("/tool")

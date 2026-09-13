@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import service.chat.RagService;
+import service.rag.RagService;
 
 import java.util.List;
 
@@ -50,6 +50,7 @@ public class EmbeddingController {
     public void stop(@RequestParam String sessionId) {
         ragService.stop(sessionId);
     }
+
     //返回 ：返回向量表示（通常是浮点数数组）
     @GetMapping
     public EmbeddingResponse embedding(@RequestParam("message") String message) {

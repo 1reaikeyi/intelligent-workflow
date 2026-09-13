@@ -1,9 +1,9 @@
-package service.chat;
+package service.flow;
 
 import model.vo.ChatEventVO;
 import reactor.core.publisher.Flux;
 
-public interface ToolService {
+public interface AgentService {
     /**
      * 获取对话id，规则：用户id_会话id
      *
@@ -13,7 +13,6 @@ public interface ToolService {
     static String getConversationId(String sessionId) {
         return sessionId;
     }
-
 
     /**
      * chat
@@ -29,5 +28,4 @@ public interface ToolService {
      * @param sessionId 会话id
      */
     void stop(String sessionId);
-
 }

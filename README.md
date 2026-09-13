@@ -33,7 +33,7 @@ intelligent-workflow/
 | 模块    | 核心功能                                                     | 技术要点                            |                                                              |
 | :------ | :----------------------------------------------------------- | :---------------------------------- | ------------------------------------------------------------ |
 | **see** | 敏感词过滤→图像识别→工具调用联动                             | spring-ai-starter-openai            | <img src="说明/graph流程图/链式.jpg" alt="链式" style="zoom:25%;" /> |
-| **rag** | Agent 智能体路由、RAG 检索、工具调用、会话管理、流式输出中断 | spring-ai-starter-openai            | <img src="说明/graph流程图/路由.jpg" alt="路由" style="zoom:25%;" /> |
+| **rag** | Agent 智能体路由、RAG 检索、工具调用、会话管理、流式输出中断 | spring-ai-starter-openai            | <img src="说明/graph流程图/链式.jpg" alt="链式" style="zoom:25%;" /> |
 | **yu**  | 英语学习工作流（造句→翻译→语音）、ASR/TTS                    | spring-ai-alibaba-starter-dashscope | <img src="说明/graph流程图/平行.jpg" alt="平行" style="zoom:25%;" /> |
 |         | 待实现                                                       |                                     | <img src="说明/graph流程图/思考.jpg" alt="思考" style="zoom:25%;" /> |
 
@@ -69,18 +69,15 @@ flowchart TD
         C1["AgentController.chat()"]:::ctrl
         C2["AgentServiceImpl.chat()"]:::svc
         
-        S1["1. 调用独立RouteAgent意图识别<br/>(无记忆专用routeChatClient)"]:::svc
-        S2["2. 清洗路由返回文本<br/>解析AgentTypeEnum智能体标识"]:::svc
-        S3["3. SpringUtil动态扫描所有Agent实现类<br/>匹配对应业务智能体"]:::svc
-        
+        S1["1. 调用独立RouteAgent意图识别(无记忆专用routeChatClient)<br/>2. 清洗路由返回文本<br/>解析AgentTypeEnum智			能体标识<br/>3. SpringUtil动态扫描所有Agent实现类<br/>匹配对应业务智能体"]:::svc
         subgraph MATCH ["智能体路由匹配"]
             direction TB
-            M1["KNOWLEDGE → KnowledgeAgent<br/>（纯RAG知识库问答，无工具）"]:::ag
-            M2["RECOMMEND → RecommendAgent<br/>（RAG向量检索 + @Tool课程工具调用）"]:::ag
-            M3["ROUTE / 无匹配 → 返回兜底提示文本"]:::ag
+            M1["KNOWLEDGE → KnowledgeAgent<br/>（纯RAG知识库问答）"]:::ag
+            M2["RECOMMEND → RecommendAgent<br/>（Tool课程工具调用）"]:::ag
+            M3["ROUTE / 无匹配 → chat处理"]:::ag
         end
         
-        S4["4. 执行目标Agent.processStream()<br/>返回Flux流式事件流"]:::svc
+        S4["执行目标Agent.processStream()<br/>返回Flux流式事件流"]:::svc
         
         subgraph FLUX ["Flux 流式事件处理细节"]
             direction TB
@@ -92,10 +89,10 @@ flowchart TD
         end
         
         %% 主链路连线
-        Start --> C1 --> C2 --> S1 --> S2 --> S3
-        S3 --> M1
-        S3 --> M2
-        S3 --> M3
+        Start --> C1 --> C2 --> S1
+        S1 --> M1
+        S1 --> M2
+        S1 --> M3
         M1 --> S4
         M2 --> S4
         M3 --> S4
@@ -110,30 +107,22 @@ flowchart TD
     %% ==================== 2. 停止生成流程 ====================
     subgraph STOP_FLOW ["【停止生成流程】"]
         direction LR
-        SS(("前端调用<br/>stop(sessionId)")):::fe
-        SC["RouteAgent.stop()"]:::ctrl
+        SS(("前端调用stop(sessionId)<br/>RouteAgent.stop()")):::fe
         SD["删除Redis会话生成状态HashKey"]:::rd
         ST["takeWhile判断key不存在<br/>直接终止LLM调用，释放资源"]:::llm
         
-        SS --> SC --> SD --> ST
+        SS --> SD --> ST
     end
 
     %% ==================== 3. 单智能体内部执行模板 ====================
     subgraph ABSTRACT ["【单智能体内部执行模板 (AbstractAgent抽象封装)】"]
         direction TB
-        A1["1. 生成全局唯一requestId，绑定单次请求"]:::ag
-        A2["2. 构建ChatRequest<br/>注入：系统提示词 / 工具列表 / RAG检索Advisor / 工具上下文"]:::ag
-        A3["3. 流式调用LLM<br/>逐块封装ChatEventVO事件"]:::llm
-        A4["4. 完成后读取本次请求全部工具调用结果<br/>追加结构化参数事件"]:::ag
-        A5["5. 统一处理会话记忆读写、中断兜底记录"]:::ag
-        
-        A1 --> A2 --> A3 --> A4 --> A5
+        A1["1. 生成全局唯一requestId，绑定单次请求<br/>2. 构建ChatRequest,注入：系统提示词 / 工具列表 / RAG检索Advisor 				/ 工具上下文<br/>3. 流式调用LLM,逐块封装ChatEventVO事件<br/>4. 完成后读取本次请求全部工具调用结果,追加结构				化参数事件<br/>5. 统一处理会话记忆读写、中断兜底记录"]:::ag
     end
 
     %% ==================== 跨模块关联 ====================
     %% 业务智能体基于抽象模板执行
-    M1 -.-o|继承并执行业务| A1
-    M2 -.-o|继承并执行业务| A1
+    M1 -.-o|执行业务| A1
     
     %% 停止流程与主链路的交互
     F3 -.->|调用| SD
@@ -169,70 +158,53 @@ flowchart TD
 
 ## 二、视觉识别多模态（see）
 
-## 策略
+## model
 
 ```mermaid
+%%{init: {'theme':'neutral','themeVariables':{'fontSize':'8px','nodeBorder':'2px'},'flowchart':{'nodeSpacing':8,'rankSpacing':32,'useMaxWidth':false,'curve':'basis'}}}%%
 flowchart TD
-    %% ==================== 样式定义 ====================
-    classDef fe fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px;
-    classDef ctrl fill:#bbdefb,stroke:#1565c0,stroke-width:2px;
-    classDef check fill:#ffccbc,stroke:#bf360c,stroke-width:2px;
-    classDef util fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
-    classDef node fill:#ffecb3,stroke:#f57f17,stroke-width:2px;
-    classDef state fill:#b2ebf2,stroke:#006064,stroke-width:2px;
-    classDef ret fill:#d1c4e9,stroke:#4a148c,stroke-width:2px;
+    Start(("上传图片 + 文字提问"))
+    C["ImgComperhendController"]
 
-    %% ==================== 主链路 ====================
-    Start(("前端上传图片 + 文字提问")):::fe
-    C["ImgComperhendController"]:::ctrl
-
-    subgraph CHAIN ["【图片识别完整链路】"]
+    subgraph CHAIN ["图片识别过程"]
         direction TB
-        S1["1. 文件前置校验<br/>图片最大尺寸 2048×2048<br/>限制文件格式"]:::check
-        S2["2. SensitiveWordInterceptor 拦截检测<br/>提问文本敏感词 → 命中直接返回 400 拦截"]:::check
-        S3["3. 文件统一转 Base64 编码<br/>(本地 File / 上传 byte[] 两套转换方法)"]:::util
-        S4["4. 组装 Media 多模态对象<br/>送入 StateGraph 编译工作流"]:::util
-
+        S1["1. 文件前置校验图片最大尺寸 2048×2048限制文件格式<br/>2. SensitiveWordInterceptor 拦截检测提问文本敏感词 →			命中直接返回 400 拦截<br/>3. 文件统一转 Base64 编码(上传 byte[] 转换base64)"]
+        
         subgraph GRAPH ["StateGraph 工作流 (异步节点)"]
             direction TB
-            G1["node1 · VisualNode (异步视觉识别)<br/>Base64 封装 Image Media<br/>调用独立 visualChatClient 识别图像内容<br/>→ visualResult 识别文本写入全局 state"]:::node
-            G2["node2 · ToolNode (异步工具查询)<br/>读取 state.visualResult 关键词<br/>调用业务工具检索商品<br/>→ toolResult 写入全局 state"]:::node
-            ST[("全局 State<br/>{visualResult, toolResult}")]:::state
+  
+            subgraph VGROUP ["node1 · VisualNode (异步+流式持续输出，最长10s)"]
+                direction TB
+                V1["① 读取 Base64 图像<br/>② 封装 Image Media 多模态对象<br/>③ 调用独立 visualChatClient 识别图像内						容<br/>④ 识别文本 → visualResult 写入 state"]
+            end
+            
+            visualResult["visualResult"]
+            
+            subgraph TGROUP ["node2 · ToolNode (异步+流式持续输出，最长30s)"]
+                direction TB
+                INPUT1["1.读取 state.visualResult<br/>2.获取 question,prompt 拼接模糊查询<br/>3.根据 prompt 						模板拼接执行<br/>4.调用业务 @Tool 工具查询,检索数据 → toolResult 写入 state"]
+                end
+            
+            toolResult["toolResult"]
+            ST[("全局 State<br/>{visualResult, toolResult}")]
+            
+            %% 节点间数据流连接
+            VGROUP --> visualResult
+            visualResult --> TGROUP
+            visualResult --> ST
+            TGROUP --> toolResult
+            toolResult --> ST
         end
 
-        S5["5. 收集 graph 全部 state 数据<br/>(识别结果 + 匹配商品) 统一返回前端"]:::ret
+        S5["5. 收集 graph 全部 state 数据<br/>(识别结果 + 匹配商品) 一起返回"]
     end
 
-    End(("前端接收统一响应")):::fe
+    End(("前端接收统一响应"))
 
-    %% ==================== 主链路连线 ====================
-    Start --> C --> S1 --> S2 --> S3 --> S4
-    S4 --> G1 --> ST
-    G1 --> G2
-    G2 --> ST
+    %% 主流程串联
+    Start --> C --> S1
+    S1 --> VGROUP
     ST --> S5 --> End
-
-    %% ==================== 单节点执行逻辑 ====================
-    subgraph NODELOGIC ["【单节点执行逻辑】"]
-        direction TB
-        V["VisualNode"]:::node
-        V1["① 读取 Base64 图像"]:::util
-        V2["② 封装 Image Media 多模态对象"]:::util
-        V3["③ 调用独立 visualChatClient 识别图像内容"]:::node
-        V4["④ 识别文本 → visualResult 写入 state"]:::state
-
-        T["ToolNode"]:::node
-        T1["① 读取 state.visualResult"]:::state
-        T2["② 提取关键词检索业务商品"]:::util
-        T3["③ 调用业务 @Tool 工具查询"]:::node
-        T4["④ 检索数据 → toolResult 写入 state"]:::state
-    end
-
-    %% 节点逻辑归属连线
-    G1 -.-o|实现| V
-    G2 -.-o|实现| T
-    V --> V1 --> V2 --> V3 --> V4
-    T --> T1 --> T2 --> T3 --> T4
 ```
 
 ## 流程结果
