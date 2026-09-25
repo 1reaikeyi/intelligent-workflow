@@ -1,0 +1,43 @@
+# chat model
+spring:
+  ai:
+    openai:
+      base-url: https://api-inference.modelscope.cn
+      api-key: ${PATH_ai_qwen_api}
+      chat:
+        options:
+          model: Qwen/Qwen3-32B
+      embedding:
+        options:
+          model: Qwen/Qwen3-Embedding-4B
+          dimensions: 1024
+          encoding-format: float
+    vectorstore:
+      redis:
+        initialize-schema: true
+        index-name: spring-ai-index
+        prefix: "embedding"
+tj:
+  ai:
+    #系统提示词
+    prompt:
+      system:
+        chat:
+          # 系统提示词文件路径，用于定义AI助手的角色和技能
+          file: classpath:system-message.txt
+          group: DEFAULT_GROUP
+          timeout-ms: 20000
+        route-agent:
+          # 路由代理系统消息文件路径，用于意图识别
+          file: classpath:route-agent-system-message.txt
+        recommend-agent:
+          # 推荐智能体系统消息文件路径，用于课程推荐
+          file: classpath:recommend-agent-system-message.txt
+        knowledge-agent:
+          # 知识讲解智能体系统消息文件路径
+          file: classpath:knowledge-agent-system-message.txt
+    #memory
+    memory:
+      #存储最大的聊天记录数
+      maxMessage: 20
+      type: redis

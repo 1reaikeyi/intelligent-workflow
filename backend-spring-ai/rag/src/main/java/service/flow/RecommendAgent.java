@@ -1,5 +1,5 @@
 package service.flow;
-import start.constants.Constant;
+import common.constants.Constant;
 import lombok.RequiredArgsConstructor;
 import model.enums.AgentTypeEnum;
 import org.springframework.ai.chat.client.ChatClient;

@@ -1,0 +1,7 @@
+spring:
+  data:
+    redis:
+      host: ${aigc.redis.host}
+      port: ${aigc.redis.port}
+      password: ${aigc.redis.password}
+      database: ${aigc.redis.database}

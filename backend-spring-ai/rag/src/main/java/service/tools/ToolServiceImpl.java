@@ -3,7 +3,7 @@ package service.tools;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import service.chat.ChatService;
-import start.constants.Constant;
+import common.constants.Constant;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;

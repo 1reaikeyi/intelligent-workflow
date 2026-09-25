@@ -2,7 +2,7 @@ package service.tools;
 
 import lombok.extern.slf4j.Slf4j;
 import model.json.CourseJson;
-import start.constants.Constant;
+import common.constants.Constant;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;

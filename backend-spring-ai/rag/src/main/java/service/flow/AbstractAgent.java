@@ -4,7 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 
-import start.constants.Constant;
+import common.constants.Constant;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;

@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: ${aigc.datasource.driver-class-name}
+    url: jdbc:mysql://${aigc.datasource.host}:${aigc.datasource.port}/${aigc.datasource.database}
+    username: ${aigc.datasource.username}
+    password: ${aigc.datasource.password}

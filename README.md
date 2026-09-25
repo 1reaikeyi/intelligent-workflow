@@ -2,10 +2,8 @@
   <h1>Intelligent-workflow - 智能 ，工作流</h1>
   <h5>Spring Boot 3 + Spring AI Alibaba + DashScope StateGraph的Agent 智能体、视觉识别、语音工作流三大核心域。AI 助手后端平台，基于RAG 检索增强 + StateGraph 可视化工作流，具有文本对话、知识库问答、工具函数调用、图像视觉识别、多节点编排、ASR 语音转写 / TTS 语音合成多模态能力，会话中断停止、会话存储用于后期分析<h5> 
 </div>
+## 配置要求
 
-
-
-配置要求
 <div align="center">
  <img src="https://img.shields.io/badge/Java-17+ -6DB33F?style=flat-square&logo=java&logoColor=white" alt="Java" />
     <img src="https://img.shields.io/badge/Spring%20Boot-3.+ -6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot" />
@@ -13,22 +11,17 @@
     <img src="https://img.shields.io/badge/Redis-7.0+ -6DB33F?style=flat-square&logo=redis&logoColor=white" alt="redis" />
     <img src="https://img.shields.io/badge/Spring%20AI-1.1.+ -6DB33F?style=flat-square&logo=spring&logoColor=white" alt="spring ai" />
     <img src="https://img.shields.io/badge/Vue-Node.js20.+ -6DB33F?style=flat-square&logo=vuedotjs&logoColor=white" alt="vue" />
-    <img src="https://img.shields.io/badge/向量库-ES -6DB33F?style=flat-square&logo=vuedotjs&logoColor=white" alt="vue" />   
 </div>
+
 ------
 
-| **启动步骤** | 创建数据库并导入 `sql/` 目录脚本。 修改 `start/src/main/resources/application-dev.yml` 中数据库与 Redis 配置。 `npm run dev ` 前端启动服务。 |
-| ------------ | ------------------------------------------------------------ |
+## 启动步骤
 
-intelligent-workflow/
+创建数据库并导入 `sql/` 目录脚本。 
 
-├── backend-spring-ai/             # 智能体路由 & RAG 检索模块  # 视觉识别模块 # 语音合成模块                    
+修改 `resources/application-dev.yml` 中数据库与 Redis 配置。 
 
-├── frontend-vue-ai/                 # 前端代码（Vue 3）
-
-├── database-sql/                      # sql.txt + 数据库设计文档.md        
-
-└── 说明
+`npm run dev ` 前端启动服务。
 
 | 模块    | 核心功能                                                     | 技术要点                            |                                                              |
 | :------ | :----------------------------------------------------------- | :---------------------------------- | ------------------------------------------------------------ |
@@ -46,6 +39,16 @@ intelligent-workflow/
 |        |                                                              |
 
 # 后端介绍
+
+intelligent-workflow/
+
+├── backend-spring-ai/             # 智能体路由 & RAG 检索模块  # 视觉识别模块 # 语音合成模块                    
+
+├── frontend-vue-ai/                 # 前端代码（Vue 3）
+
+├── database-sql/                      # sql.txt + 数据库设计文档.md        
+
+└── 说明
 
 ## 一、智能体路由 RAG 模块-rag
 
@@ -149,8 +152,6 @@ flowchart TD
 4. 会话记忆仅 MySQL 单存储，高峰期对话接口响应 300ms；新增 Redis 缓存实现，P99 降至 50ms 内。
 5. RAG 未设置相似度阈值，大量无关文档拼接进 prompt，回答跑偏；增加 0.6 阈值过滤，答案准确性显著提升。
 
-**性能指标**
-
 - 路由意图识别单次平均耗时 25ms；
 - 普通闲聊流式首块输出 P95 < 120ms；
 - Redis 会话缓存查询耗时稳定 < 5ms；
@@ -182,7 +183,7 @@ flowchart TD
             
             subgraph TGROUP ["node2 · ToolNode (异步+流式持续输出，最长30s)"]
                 direction TB
-                INPUT1["1.读取 state.visualResult<br/>2.获取 question,prompt 拼接模糊查询<br/>3.根据 prompt 						模板拼接执行<br/>4.调用业务 @Tool 工具查询,检索数据 → toolResult 写入 state"]
+                INPUT1["1.读取 state.visualResult<br/>2.获取 question,prompt 拼接模糊查询<br/>3.根据 promp模板拼接执行<br/>4.调用业务@Tool工具查询→ toolResult 写入 state"]
                 end
             
             toolResult["toolResult"]
@@ -224,10 +225,6 @@ flowchart TD
 2. 敏感词校验放在 AI 服务内部，大量违规请求消耗 token；前置拦截器，直接阻断非法请求，节省模型调用成本。
 3. 识别流程串行写死在 Service，新增关键词过滤需要重写全部调用逻辑；重构为 StateGraph 节点编排，流程配置化。
 4. 本地文件直接传递 File 对象，容器多实例部署路径不存在；统一 Base64 流转，彻底解决路径兼容问题。
-
-Q：视觉识别为什么单独一套 visualChatClient，不共用对话客户端？
-
-答：通用对话 ChatClient 加载文本对话相关提示词、记忆、文本工具，视觉模型入参格式、系统提示完全独立，拆分专用客户端隔离配置，避免参数冲突，职责单一。
 
 ## 三、英语学习语音工作流（yu）
 

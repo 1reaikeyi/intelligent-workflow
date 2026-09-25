@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: aigc
+  config:
+    import:
+      - classpath:redis-dev.yaml
+      - classpath:mysql-dev.yaml
+      - classpath:ai.yaml
+
+
+# MyBatis-Plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/**/*.xml

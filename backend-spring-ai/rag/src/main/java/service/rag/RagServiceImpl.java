@@ -53,11 +53,9 @@ public class RagServiceImpl implements RagService {
         sessionService.updateTitle(sessionId,question);
         // (1)大模型输出内容的缓存器，用于在输出中断后的数据存储
         var outputBuilder = new StringBuilder();
-        //会话id-->转sessionId
         var conversationId = ChatService.getConversationId(sessionId);
-        //控制是否stop
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
-        // 创建RAG增强
+        // 创建RAG
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(question)
                 .similarityThreshold(0.6d)
@@ -65,9 +63,20 @@ public class RagServiceImpl implements RagService {
                 .build();
         List<Document> retrievedDocs = vectorStore.similaritySearch(searchRequest);
 
-        if (!retrievedDocs.isEmpty() &&
-                retrievedDocs.get(0).getScore() >= 0.6d) {
-            log.warn("RAG未命中, question={}, sessionId={}", question, sessionId);
+        // topK 中任意一条相似度 ≥ 0.6 即命中
+        List<Document> hitDocs = retrievedDocs.stream()
+                .filter(d -> d.getScore() != null && d.getScore() >= 0.6d)
+                .toList();
+
+        if (hitDocs.isEmpty()) {
+            log.warn("RAG未命中, question={}, sessionId={}, 召回数={}, 最高分={}",
+                    question, sessionId, retrievedDocs.size(),
+                    retrievedDocs.stream()
+                            .map(Document::getScore)
+                            .filter(java.util.Objects::nonNull)
+                            .max(Double::compareTo)
+                            .map(String::valueOf)
+                            .orElse("无召回"));
             return Flux.just(
                     ChatEventVO.builder()
                             .eventData("抱歉，知识库中未找到相关信息，无法回答。")
@@ -75,27 +84,26 @@ public class RagServiceImpl implements RagService {
                             .build(),
                     ChatEventVO.builder()
                             .eventType(ChatEventTypeEnum.STOP.getValue())
-                            .build()
-            );
+                            .build());
         }
-//        if (hit) {}
-        log.info("RAG命中, question={}, 召回数={}, top1分数={}",
-                question, retrievedDocs.size(), retrievedDocs.get(0).getScore());
 
-        String context = retrievedDocs.stream()
+        log.info("RAG命中, question={}, 召回数={}, 达标数={}, top1分数={}",
+                question, retrievedDocs.size(), hitDocs.size(),
+                retrievedDocs.get(0).getScore());
+
+        // context 只拼达标文档，不达标的别喂给模型（省 token、降低干扰）
+        String context = hitDocs.stream()
                 .map(Document::getText)
                 .collect(Collectors.joining("\n---\n"));
-
+        String prompt = """
+                         请根据以下参考上下文回答问题。如果上下文中没有答案，请明确说"不知道"。
+                         ## 参考上下文
+                         %s
+                         ## 问题
+                         %s
+                        """ .formatted(context, question);
         return ragClient.prompt()
-                .user(u -> u.text("""
-                        请根据以下参考上下文回答问题。如果上下文中没有答案，请明确说"不知道"。
-                        ## 参考上下文
-                        %s
-                        ## 问题
-                        %s
-                        """
-                        .formatted(context, question)))
-
+                .user(prompt)
                 .advisors(advisorSpec -> advisorSpec
                             //会话记忆
                             .param(ChatMemory.CONVERSATION_ID, conversationId))
@@ -126,8 +134,8 @@ public class RagServiceImpl implements RagService {
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
                     return chatEventVO;})
-                .concatWith(Flux.just(ChatEventVO.builder().
-                        eventType(ChatEventTypeEnum.STOP.getValue())
+                .concatWith(Flux.just(ChatEventVO.builder()
+                        .eventType(ChatEventTypeEnum.STOP.getValue())
                         .build()));
     }
     /**

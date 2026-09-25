@@ -1,4 +1,4 @@
-package start.constants;
+package common.constants;
 
 public interface FileErrorInfo {
     interface Msg {
