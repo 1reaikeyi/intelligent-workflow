@@ -56,27 +56,8 @@ public class RagServiceImpl implements RagService {
         var conversationId = ChatService.getConversationId(sessionId);
         var outputHash = stringRedisTemplate.boundHashOps(OUTPUT_STATUS);
         // 创建RAG
-        SearchRequest searchRequest = SearchRequest.builder()
-                .query(question)
-                .similarityThreshold(0.6d)
-                .topK(6)
-                .build();
-        List<Document> retrievedDocs = vectorStore.similaritySearch(searchRequest);
-
-        // topK 中任意一条相似度 ≥ 0.6 即命中
-        List<Document> hitDocs = retrievedDocs.stream()
-                .filter(d -> d.getScore() != null && d.getScore() >= 0.6d)
-                .toList();
-
-        if (hitDocs.isEmpty()) {
-            log.warn("RAG未命中, question={}, sessionId={}, 召回数={}, 最高分={}",
-                    question, sessionId, retrievedDocs.size(),
-                    retrievedDocs.stream()
-                            .map(Document::getScore)
-                            .filter(java.util.Objects::nonNull)
-                            .max(Double::compareTo)
-                            .map(String::valueOf)
-                            .orElse("无召回"));
+        String result = rag(question,sessionId);
+        if (result == null){
             return Flux.just(
                     ChatEventVO.builder()
                             .eventData("抱歉，知识库中未找到相关信息，无法回答。")
@@ -86,24 +67,9 @@ public class RagServiceImpl implements RagService {
                             .eventType(ChatEventTypeEnum.STOP.getValue())
                             .build());
         }
-
-        log.info("RAG命中, question={}, 召回数={}, 达标数={}, top1分数={}",
-                question, retrievedDocs.size(), hitDocs.size(),
-                retrievedDocs.get(0).getScore());
-
-        // context 只拼达标文档，不达标的别喂给模型（省 token、降低干扰）
-        String context = hitDocs.stream()
-                .map(Document::getText)
-                .collect(Collectors.joining("\n---\n"));
-        String prompt = """
-                         请根据以下参考上下文回答问题。如果上下文中没有答案，请明确说"不知道"。
-                         ## 参考上下文
-                         %s
-                         ## 问题
-                         %s
-                        """ .formatted(context, question);
+//        if (result != null){}
         return ragClient.prompt()
-                .user(prompt)
+                .user(result)
                 .advisors(advisorSpec -> advisorSpec
                             //会话记忆
                             .param(ChatMemory.CONVERSATION_ID, conversationId))
@@ -121,7 +87,7 @@ public class RagServiceImpl implements RagService {
                 .doOnComplete(() -> outputHash.delete(sessionId))
                 .doOnCancel(() -> {
                     // 当输出被取消时，保存输出的内容到历史记录中
-                    this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
+                    saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
                 //控制是否继续
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
@@ -148,6 +114,48 @@ public class RagServiceImpl implements RagService {
         chatMemory.add(conversationId, new AssistantMessage(content));
     }
 
+    private String rag(String question, String sessionId) {
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(question)
+                .similarityThreshold(0.6d)
+                .topK(6)
+                .build();
+        List<Document> retrievedDocs = vectorStore.similaritySearch(searchRequest);
+
+        // topK 中任意一条相似度 ≥ 0.6 即命中
+        List<Document> hitDocs = retrievedDocs.stream()
+                .filter(d -> d.getScore() != null && d.getScore() >= 0.6d)
+                .toList();
+
+        if (hitDocs.isEmpty()) {
+            log.warn("RAG未命中, question={}, sessionId={}, 召回数={}, 最高分={}",
+                    question, sessionId, retrievedDocs.size(),
+                    retrievedDocs.stream()
+                            .map(Document::getScore)
+                            .filter(java.util.Objects::nonNull)
+                            .max(Double::compareTo)
+                            .map(String::valueOf)
+                            .orElse("无召回"));
+            return null;
+        }
+
+        log.info("RAG命中, question={}, 召回数={}, 达标数={}, top1分数={}",
+                question, retrievedDocs.size(), hitDocs.size(),
+                retrievedDocs.get(0).getScore());
+
+        // context 只拼达标文档，不达标的别喂给模型（省 token、降低干扰）
+        String context = hitDocs.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n---\n"));
+        String prompt = """
+                         请根据以下参考上下文回答问题。如果上下文中没有答案，请明确说"不知道"。
+                         ## 参考上下文
+                         %s
+                         ## 问题
+                         %s
+                        """ .formatted(context, question);
+        return prompt;
+    }
     /**
      * 停止生成
      *
