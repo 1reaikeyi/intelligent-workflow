@@ -2,14 +2,14 @@
 spring:
   ai:
     openai:
-      base-url: https://api-inference.modelscope.cn
-      api-key: ${PATH_ai_qwen_api}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${PATH_ai_aliyun_api}
       chat:
         options:
-          model: Qwen/Qwen3-32B
+          model: qwen3.8-flash
       embedding:
         options:
-          model: Qwen/Qwen3-Embedding-4B
+          model: qwen3.7-text-embedding
           dimensions: 1024
           encoding-format: float
     vectorstore:

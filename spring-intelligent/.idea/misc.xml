@@ -25,6 +25,9 @@
         <option value="$PROJECT_DIR$/aliyun/pom.xml" />
         <option value="$PROJECT_DIR$/yu/pom.xml" />
         <option value="$PROJECT_DIR$/rag/pom.xml" />
+        <option value="$PROJECT_DIR$/mcp/pom.xml" />
+        <option value="$PROJECT_DIR$/mcp-client/pom.xml" />
+        <option value="$PROJECT_DIR$/mcp-serve/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Slf4j
 //主程序入口
 @SpringBootApplication
-@ComponentScan({"audio","start","node"})
+@ComponentScan({"audio","start","node","controller"})
 public class AudioApplication {
     public static void main(String[] args){
         SpringApplication.run(AudioApplication.class, args);

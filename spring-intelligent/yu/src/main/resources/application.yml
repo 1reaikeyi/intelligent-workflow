@@ -1,0 +1,30 @@
+# 服务端口与应用名
+server:
+  port: 8080
+
+spring:
+  ai:
+    dashscope:
+      base-url: https://dashscope.aliyuncs.com
+      api-key: ${PATH_ai_aliyun_api}
+      chat:
+        options:
+          # 视觉理解 qwen3.5-flash（备用：qwen3.5-flash-2026-02-23）
+          model: qwen-flash-2025-07-28
+          max-tokens: 1024
+      embedding:
+        options:
+          # 多模态向量 tongyi-embedding-vision-flash-2026-03-06
+          model: text-embedding-v4
+          dimensions: 1024
+          text-type: float
+      audio:
+        speech:
+          options:
+            model: sambert-zhiqi-v1
+            format: mp3
+            speed: 0.8
+            volume: 60
+        transcription:
+          options:
+            model: paraformer-v2

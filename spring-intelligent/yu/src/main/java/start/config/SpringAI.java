@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SpringAI {
+
     @Bean
     public ChatClient chatClient(DashScopeChatModel dashScopeChatModel) {
         return ChatClient.builder(dashScopeChatModel)

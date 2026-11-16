@@ -1,0 +1,12 @@
+spring:
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: ${spring.application.name}
+        version: 1.0.0
+        streamable-http:
+            mcp-endpoint: /mcp
+        type: ASYNC
+        protocol: stateless
+

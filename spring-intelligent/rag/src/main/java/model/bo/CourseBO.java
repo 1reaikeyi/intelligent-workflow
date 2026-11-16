@@ -1,4 +1,4 @@
-package model.json;
+package model.bo;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.AllArgsConstructor;
@@ -11,7 +11,7 @@ import model.entity.Course;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CourseJson {
+public class CourseBO {
 
     @JsonPropertyDescription("课程id")
     private Long id;
@@ -26,11 +26,11 @@ public class CourseJson {
     @JsonPropertyDescription("课程详细介绍")
     private String detail;
 
-    public static CourseJson of(Course course) {
+    public static CourseBO of(Course course) {
         if (null == course) {
             throw new IllegalArgumentException("没有查询到数据");
         }
-        return CourseJson.builder()
+        return CourseBO.builder()
                 .id(course.getId())
                 .name(course.getName())
                 .price(course.getPrice())

@@ -69,6 +69,7 @@ public class ToolServiceImpl implements ToolService {
                         .param("now", LocalDateTime.now())
                 )
                 .toolContext(Map.of(Constant.REQUEST_ID, requestId)) //通过工具上下文传递参数
+
                 .stream()
                 .chatResponse()
                 // 第一次输出内容时执行
@@ -87,7 +88,6 @@ public class ToolServiceImpl implements ToolService {
                 .map(chatResponse -> {
                     // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
                     // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
-                    // 从而解决，在历史聊天记录中没有外参数的问题
                     var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
                     if (StrUtil.equals(Constant.STOP, finishReason)) {
                         var messageId = chatResponse.getMetadata().getId();

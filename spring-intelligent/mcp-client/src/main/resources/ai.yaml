@@ -1,0 +1,23 @@
+spring:
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${PATH_ai_aliyun_api}
+      chat:
+        options:
+          model: qwen3.8-flash
+    mcp:
+      client:
+        enabled: true
+        name: mcp-client
+        version: 1.0.0
+        request-timeout: 30s
+        type: SYNC
+        toolcallback:
+          enabled: true
+        streamable-http:
+          connections:
+            weather-server:
+              url: http://localhost:8081
+              endpoint: /mcp
+

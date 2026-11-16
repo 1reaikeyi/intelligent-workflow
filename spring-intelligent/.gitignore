@@ -3,9 +3,18 @@
 HELP.md
 .mvn/wrapper/maven-wrapper.jar
 
-# 全局忽略所有 target 目录（最简洁有效，删掉多余反向排除）
+# 运行日志
+logs/
+*.log
+*.xml.versionsBackup
+*.swp
+
+# 全局忽略所有 target 目录
 
 **/target/
+!*/build/*.java
+!*/build/*.html
+!*/build/*.xml
 
 # STS 开发工具配置
 
@@ -31,3 +40,11 @@ build/
 # VS Code 开发工具配置
 
 .vscode/
+
+# IntelliJ IDEA -
+
+.idea
+*.iws
+*.iml
+*.ipr
+out/
