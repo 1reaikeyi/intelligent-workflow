@@ -1,8 +1,9 @@
 
 
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
+import com.alibaba.cloud.ai.dashscope.embedding.text.DashScopeEmbeddingModel;
 import controller.QwenApplication;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import util.VectorDistanceUtils;
@@ -15,7 +16,7 @@ import java.util.List;
 public class AiDemoApplicationTests {
 
     @Autowired
-    private OpenAiEmbeddingModel embeddingModel;
+    private DashScopeEmbeddingModel embeddingModel;
 
     @Test
     public void testEmbedding() {

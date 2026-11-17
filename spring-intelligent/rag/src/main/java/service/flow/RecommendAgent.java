@@ -1,5 +1,6 @@
 package service.flow;
 import common.constants.Constant;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import model.enums.AgentTypeEnum;
 import org.springframework.ai.chat.client.ChatClient;
@@ -7,6 +8,7 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import service.tools.CourseTool;
@@ -26,8 +28,7 @@ public class RecommendAgent extends AbstractAgent {
     private final VectorStore vectorStore;
     private final CourseTool courseTool;
 
-    // 注入默认的 ChatClient（带记忆功能）
-    @Qualifier("chatClient")
+    @Resource(name = "chatClient")
     private final ChatClient chatClient;
 
     @Override

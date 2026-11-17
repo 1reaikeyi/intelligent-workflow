@@ -1,11 +1,11 @@
-package service;
+package service.session;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.stream.StreamUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import common.properties.SessionProperties;
+import start.properties.SessionProperties;
 import lombok.extern.slf4j.Slf4j;
 import mapper.SessionMapper;
 import model.entity.ChatRecord;

@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.SessionService;
+import service.session.SessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
@@ -39,6 +39,7 @@ public class ToolServiceImpl implements ToolService {
     private static final ChatEventVO STOP_EVENT = ChatEventVO.builder()
                                 .eventType(ChatEventTypeEnum.STOP.getValue())
                                 .build();
+    private static final String REQUEST_ID = "requestId";
     /**
      * chat
      *
@@ -60,61 +61,60 @@ public class ToolServiceImpl implements ToolService {
         return toolClient.prompt()
                 .user(question)
                 .advisors(advisorSpec -> advisorSpec
-                        //会话记忆
                         .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .system(promptSystemSpec -> promptSystemSpec
-                        //系统role
                         .text(systemPromptConfig.getChatSystemMessage().get())
-                        //param = 参数
                         .param("now", LocalDateTime.now())
                 )
-                .toolContext(Map.of(Constant.REQUEST_ID, requestId)) //通过工具上下文传递参数
+
+                .toolContext(Map.of(REQUEST_ID, requestId)) //通过工具上下文传递参数
 
                 .stream()
                 .chatResponse()
                 // 第一次输出内容时执行
                 // 出现异常时，删除标识
                 // 完成时执行，删除标识
+                //stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doFirst(() -> outputHash.put(sessionId, "true"))  // 将布尔值转换为字符串存入 Redis
                 .doOnError(throwable -> outputHash.delete(sessionId))
                 .doOnComplete(() -> outputHash.delete(sessionId))
-                //(2)stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doOnCancel(() -> {
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
                 //控制是否继续
                 .takeWhile(chatResponse -> outputHash.get(sessionId) != null )
 
+                // 流式返回的部分分块getResult() 可能为 null，直接跳过
+                .filter(chatResponse -> chatResponse != null
+                        && chatResponse.getResult() != null
+                        && chatResponse.getResult().getOutput() != null
+                        && chatResponse.getResult().getOutput().getText() != null)
+
                 .map(chatResponse -> {
-                    // 对于响应结果进行处理，如果是最后一条数据，就把此次消息id放到内存中
-                    // 主要用于存储消息数据到 redis中，可以根据消息di获取的请求id，再通过请求id就可以获取到参数列表了
                     var finishReason = chatResponse.getResult().getMetadata().getFinishReason();
-                    if (StrUtil.equals(Constant.STOP, finishReason)) {
+                    if (StrUtil.equals("STOP", finishReason)) {
                         var messageId = chatResponse.getMetadata().getId();
-                        ToolResultHolder.put(messageId, Constant.REQUEST_ID, requestId);
+                        ToolResultHolder.put(messageId, "requestId", requestId);
                     }
                     String response = chatResponse.getResult().getOutput().getText();
-                    // (3)追加到输出内容中
                     outputBuilder.append(response);
                     ChatEventVO chatEventVO = ChatEventVO.builder()
                             .eventData(response)
                             .eventType(ChatEventTypeEnum.DATA.getValue())
                             .build();
-                    return chatEventVO;})
+                    return chatEventVO;
+                })
 
                 .concatWith(Flux.defer(() -> {
                     // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
                     var map = ToolResultHolder.get(requestId);
-                    if (!map.isEmpty()) {
-                        ToolResultHolder.remove(requestId); // 清除参数列表
-                        // 响应给前端的参数数据
-                        var chatEventVO = ChatEventVO.builder()
-                                .eventData(map)
-                                .eventType(ChatEventTypeEnum.PARAM.getValue())
-                                .build();
-                        return Flux.just(chatEventVO, STOP_EVENT);
+                    if (map.isEmpty()) {
+                        return Flux.just(STOP_EVENT);
                     }
-                    return Flux.just(STOP_EVENT);
+                    ToolResultHolder.remove(requestId); // 清除参数列表
+                    // 响应给前端的参数数据
+                    return Flux.just(new ChatEventVO(map,ChatEventTypeEnum.DATA.getValue()),
+                                    STOP_EVENT);
                 }));
     }
     /**

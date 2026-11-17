@@ -8,7 +8,7 @@ import model.vo.MessageVO;
 import model.vo.SessionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import service.SessionService;
+import service.session.SessionService;
 
 import java.util.List;
 import java.util.Map;

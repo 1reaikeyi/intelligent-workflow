@@ -1,5 +1,6 @@
 package service.flow;
 
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import model.enums.AgentTypeEnum;
 import org.springframework.ai.chat.client.ChatClient;
@@ -14,7 +15,7 @@ public class KnowledgeAgent extends AbstractAgent {
     private final SystemPromptConfig systemPromptConfig;
 
     // 注入默认的 ChatClient（带记忆功能）
-    @Qualifier("chatClient")
+    @Resource(name = "chatClient")
     private final ChatClient chatClient;
 
     @Override

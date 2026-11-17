@@ -1,4 +1,4 @@
-package service;
+package service.session;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import model.entity.Session;

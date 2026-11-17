@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import service.SessionService;
+import service.session.SessionService;
 import start.config.SystemPromptConfig;
 
 import java.time.LocalDateTime;
