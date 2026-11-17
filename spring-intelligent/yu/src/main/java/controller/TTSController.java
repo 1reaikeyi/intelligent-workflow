@@ -1,7 +1,7 @@
 
 package controller;
 
-import audio.tts.TTSService;
+import audio.TTSService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
