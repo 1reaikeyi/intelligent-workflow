@@ -8,12 +8,15 @@ spring:
       base-url: https://dashscope.aliyuncs.com
       api-key: ${PATH_ai_aliyun_api}
       chat:
+        # 文本生成
+        # completions-path:/api/v1/services/aigc/text-generation/generation
+        # 多模态生成
+        # completions-path: /api/v1/services/aigc/multimodal-generation/generation
+        completions-path: /api/v1/services/aigc/multimodal-generation/generation
         options:
           model: qwen3.8-flash
-      embedding:
-        options:
-          model: qwen3.7-text-embedding-flash
-          dimensions: 1024
+          max-tokens: 1024        # 限制输出，避免无限思考
+          enable-thinking: false  # 识图场景一般不需要思考链
 
   application:
     name: qwen
@@ -26,6 +29,8 @@ spring:
 
 # 图片上传限制
 image:
-  max-width:2048
-  max-height:2048
+  max-width: 2048
+  max-height: 2048
+
+
 
