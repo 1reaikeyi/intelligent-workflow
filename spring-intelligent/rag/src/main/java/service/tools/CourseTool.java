@@ -2,7 +2,7 @@ package service.tools;
 
 import lombok.extern.slf4j.Slf4j;
 import model.bo.CourseBO;
-import common.constants.Constant;
+import constants.Constant;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -19,8 +19,7 @@ public class CourseTool {
     private static final String FIELD_NAME_FORMAT = "{}_{}";  // 提取格式字符串常量
 
     @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
-    public CourseBO queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId,
-                                    ToolContext toolContext) {
+    public CourseBO queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId, ToolContext toolContext) {
         return Optional.ofNullable(courseId)
                 .map(id -> courseService.getById(id))
                 .map(CourseBO::of)
@@ -30,7 +29,7 @@ public class CourseTool {
                     // 将首字母转为小写
                     String lowerClassName = className.isEmpty() ? className 
                             : Character.toLowerCase(className.charAt(0)) + className.substring(1);
-                    String field = String.format(FIELD_NAME_FORMAT, lowerClassName, courseBO.getId());
+                    String field = lowerClassName + "_" + courseBO.getId();
                     // 存储的key
                     Object requestIdObj = toolContext.getContext().get(Constant.REQUEST_ID);
                     String requestId = requestIdObj != null ? String.valueOf(requestIdObj) : null;

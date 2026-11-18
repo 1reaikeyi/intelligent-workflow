@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Configuration
-public class Node2Link {
+public class NodeLink2 {
     @Autowired
     private VisualNode visualNode;
     @Autowired
@@ -51,7 +51,7 @@ public class Node2Link {
             // UML 图生成与打印
             GraphRepresentation representation = graph.getGraph(GraphRepresentation.Type.PLANTUML, "English Flow");
             // 打印 UML 图内容到控制台
-            System.out.println("=== English Flow UML Diagram ===");
+            System.out.println("=== UML Diagram ===");
             System.out.println(representation.content());
             System.out.println("==================================");
         } catch (GraphStateException e) {

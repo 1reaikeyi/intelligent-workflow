@@ -29,6 +29,7 @@ public class VisualNode implements NodeAction {
         String result = result(media);
         return Map.of("visualResult", result != null ? result : null);
     }
+
     public String result(Media media) {
         return visualClient.prompt()
                 .user(promptUserSpec -> promptUserSpec.text("识别有哪些技术桟？").media(media))

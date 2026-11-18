@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class ChatServiceImpl implements ChatService {
-    //src/main/java/start/config/ChatConfiguratioon.java::chatClient
+    //src/main/java/start/config/ChatConfig.java::chatClient
     @Resource(name = "chatClient")
     private ChatClient chatClient;
     @Autowired

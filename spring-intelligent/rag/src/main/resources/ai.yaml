@@ -17,6 +17,8 @@ spring:
         initialize-schema: true
         index-name: spring-ai-index
         prefix: "embedding"
+  config:
+    import: classpath:session.yml
 tj:
   ai:
     #系统提示词
@@ -24,18 +26,18 @@ tj:
       system:
         chat:
           # 系统提示词文件路径，用于定义AI助手的角色和技能
-          file: classpath:system-message.txt
+          file: classpath:file/system-message.txt
           group: DEFAULT_GROUP
           timeout-ms: 20000
         route-agent:
           # 路由代理系统消息文件路径，用于意图识别
-          file: classpath:route-agent-system-message.txt
+          file: classpath:file/route-agent-system-message.txt
         recommend-agent:
           # 推荐智能体系统消息文件路径，用于课程推荐
-          file: classpath:recommend-agent-system-message.txt
+          file: classpath:file/recommend-agent-system-message.txt
         knowledge-agent:
           # 知识讲解智能体系统消息文件路径
-          file: classpath:knowledge-agent-system-message.txt
+          file: classpath:file/knowledge-agent-system-message.txt
     #memory
     memory:
       #存储最大的聊天记录数

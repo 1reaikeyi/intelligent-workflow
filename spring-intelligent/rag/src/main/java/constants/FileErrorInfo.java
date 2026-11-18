@@ -1,4 +1,4 @@
-package common.constants;
+package constants;
 
 public interface FileErrorInfo {
     interface Msg {
@@ -8,7 +8,6 @@ public interface FileErrorInfo {
         String INVALID_FILE_STATUS = "无效的文件状态";
 
         String FILE_UPLOAD_ERROR = "上传文件失败";
-
 
         String MEDIA_APPLY_UPLOAD_ERROR = "申请上传视频失败";
         String MEDIA_UPLOAD_ERROR = "上传视频失败";

@@ -19,13 +19,13 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class SystemPromptConfig {
 
-    @Value("${tj.ai.prompt.system.chat.file:classpath:system-message.txt}")
+    @Value("${tj.ai.prompt.system.chat.file:classpath:file/system-message.txt}")
     private String systemChatFilePath;
-    @Value("${tj.ai.prompt.route.agent.file:classpath:route-agent-system-message.txt}")
+    @Value("${tj.ai.prompt.system.route-agent.file:classpath:file/route-agent-system-message.txt}")
     private String routeAgentFilePath;
-    @Value("${tj.ai.prompt.recommend.agent.file:classpath:recommend-agent-system-message.txt}")
+    @Value("${tj.ai.prompt.system.recommend-agent.file:classpath:file/recommend-agent-system-message.txt}")
     private String recommendAgentFilePath;
-    @Value("${tj.ai.prompt.knowledge.agent.file:classpath:knowledge-agent-system-message.txt}")
+    @Value("${tj.ai.prompt.system.knowledge-agent.file:classpath:file/knowledge-agent-system-message.txt}")
     private String knowledgeAgentFilePath;
 
     private final AtomicReference<String> chatSystemMessage = new AtomicReference<>();

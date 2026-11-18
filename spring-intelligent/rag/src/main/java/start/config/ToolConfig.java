@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import service.tools.CourseTool;
 
 @Configuration
-public class ToolConfiguratioon {
+public class ToolConfig {
     /**
      * 配置 tool 客户端配置
      */

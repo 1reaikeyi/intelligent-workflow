@@ -1,9 +1,9 @@
 package service.tools;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import service.chat.ChatService;
-import common.constants.Constant;
 import jakarta.annotation.Resource;
 import model.enums.ChatEventTypeEnum;
 import model.vo.ChatEventVO;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Service
 public class ToolServiceImpl implements ToolService {
-    //src/main/java/start/config/ToolConfiguratioon.java::toolClient
+    //src/main/java/start/config/ToolConfig.java::toolClient
     @Resource(name = "toolClient")
     private ChatClient toolClient;
     @Autowired
@@ -35,10 +35,7 @@ public class ToolServiceImpl implements ToolService {
     private SessionService sessionService;
 
     private final static String  OUTPUT_STATUS = "OUTPUT_STATUS";
-    // 输出结束的标记
-    private static final ChatEventVO STOP_EVENT = ChatEventVO.builder()
-                                .eventType(ChatEventTypeEnum.STOP.getValue())
-                                .build();
+
     private static final String REQUEST_ID = "requestId";
     /**
      * chat
@@ -108,13 +105,13 @@ public class ToolServiceImpl implements ToolService {
                 .concatWith(Flux.defer(() -> {
                     // 通过请求id获取到参数列表，如果不为空，就将其追加到返回结果中
                     var map = ToolResultHolder.get(requestId);
-                    if (map.isEmpty()) {
-                        return Flux.just(STOP_EVENT);
+                    if (ObjectUtil.isEmpty(map)) {
+                        return Flux.just(new ChatEventVO("STOP",ChatEventTypeEnum.STOP.getValue()));
                     }
                     ToolResultHolder.remove(requestId); // 清除参数列表
                     // 响应给前端的参数数据
                     return Flux.just(new ChatEventVO(map,ChatEventTypeEnum.DATA.getValue()),
-                                    STOP_EVENT);
+                            new ChatEventVO("STOP",ChatEventTypeEnum.STOP.getValue()));
                 }));
     }
     /**

@@ -16,7 +16,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ToolResultHolder {
 
     private static final Map<String, Map<String, Object>> HANDLER_MAP = new ConcurrentHashMap<>();
-
+   /**
+    * 第一处
+    * 参数	        实际值	                            说明
+    * key	    "requestId，如 ""a1b2c3d4..."""	    本次对话请求的唯一 ID，来自 toolContext
+    * field	    courseBO_101	                    生成：类名首字母小写 + _ + 课程 id
+    * result	CourseBO 对象	                    存储的 result 是一个 CourseBO 对的所有信息的所有信息
+    * 第二处处
+    参数	        实际值	                            说明
+    key	    messageId，如 chatcmpl-435e81b-...	    大模型响应的消息 id，来自 ChatResponse metadata
+    field	"""requestId"""	                        "固定字符串，表示""这里存的是 requestId 指针"""
+    result	requestId 字符串	                    本次请求的 UUID
+    */
 
     /**
      * 工具类，禁止实例化

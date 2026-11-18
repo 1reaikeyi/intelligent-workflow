@@ -20,6 +20,7 @@ import java.util.Map;
 public class Read implements NodeAction {
     @Autowired
     private DashScopeAudioSpeechModel dashScopeAudioSpeechModel;
+
     private static String path = "D:\\a.github\\intelligent-workflow\\spring-intelligent\\audio\\mp3";
 
     @Override

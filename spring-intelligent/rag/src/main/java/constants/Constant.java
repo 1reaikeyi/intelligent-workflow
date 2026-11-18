@@ -1,4 +1,4 @@
-package common.constants;
+package constants;
 
 public interface Constant {
 

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 @Configuration
-public class Node1Link {
+public class NodeLink1 {
     @Autowired
     private Sentence sentenceAction;
     @Autowired
@@ -60,7 +60,7 @@ public class Node1Link {
 
         GraphRepresentation representation = graph.getGraph(GraphRepresentation.Type.PLANTUML, "English Flow");
         // 打印 UML 图内容到控制台
-        System.out.println("=== English Flow UML Diagram ===");
+        System.out.println("===UML Diagram ===");
         System.out.println(representation.content());
         System.out.println("==================================");
         

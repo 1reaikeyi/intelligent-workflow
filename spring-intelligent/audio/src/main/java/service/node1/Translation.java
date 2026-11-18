@@ -13,13 +13,15 @@ import java.util.Map;
 public class Translation implements NodeAction{
     @Resource(name="chatClient")
     private ChatClient chatClient;
+
     @Override
     public Map<String, Object> apply(OverAllState state) throws Exception {
         String sentence = state.value("sentence","");
         PromptTemplate promptTemplate = new PromptTemplate("你是负责英语翻译"+
                 "根据给定的{sentence}翻译成中文");
         promptTemplate.add("sentence", sentence);
-        String result = chat(promptTemplate.render());
+
+        String result = this.chat(promptTemplate.render());
         return Map.of("translation", result != null ? result : "null");
     }
     public String chat(String sentence) {

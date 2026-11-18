@@ -1,5 +1,5 @@
 package service.flow;
-import common.constants.Constant;
+import constants.Constant;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import model.enums.AgentTypeEnum;
@@ -8,8 +8,6 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import service.tools.CourseTool;
 import start.config.SystemPromptConfig;

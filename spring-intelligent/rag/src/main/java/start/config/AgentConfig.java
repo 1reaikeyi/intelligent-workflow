@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * 智能体相关配置
  */
 @Configuration
-public class AgentConfiguration {
+public class AgentConfig {
 
     /**
      * 配置路由智能体专用的 ChatClient

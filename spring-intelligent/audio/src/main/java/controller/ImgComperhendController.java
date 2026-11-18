@@ -1,6 +1,6 @@
 package controller;
 
-import service.node2.Node2Link;
+import service.node2.NodeLink2;
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,12 +15,12 @@ import java.util.Map;
 @RestController
 public class ImgComperhendController {
     @Autowired
-    private Node2Link node2Link;
+    private NodeLink2 nodeLink2;
     @PostMapping("/see")
     public Object flow(@RequestParam MultipartFile file,
                        @RequestParam String question) throws IOException {
         // 获取编译后的状态图
-        CompiledGraph compiledGraph = node2Link.comprehend();
+        CompiledGraph compiledGraph = nodeLink2.comprehend();
 
         String fileBase64 = Base64.getEncoder().encodeToString(file.getBytes());
         return compiledGraph.invoke(Map.of("file", fileBase64, "question", question))

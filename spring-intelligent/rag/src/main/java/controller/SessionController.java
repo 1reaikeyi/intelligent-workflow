@@ -1,7 +1,7 @@
 package controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import common.result.Result;
+import result.Result;
 import model.entity.Session;
 import model.vo.ChatSessionVO;
 import model.vo.MessageVO;

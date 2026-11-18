@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class RagServiceImpl implements RagService {
-    //src/main/java/start/config/RagConfiguratioon.java::ragClient
+    //src/main/java/start/config/RagConfig.java::ragClient
     @Resource(name = "ragClient")
     private ChatClient ragClient;
     @Autowired

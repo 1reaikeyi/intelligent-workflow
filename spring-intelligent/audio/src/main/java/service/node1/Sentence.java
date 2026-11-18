@@ -2,6 +2,7 @@ package service.node1;
 
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
+import config.Constant;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -14,11 +15,12 @@ public class Sentence implements NodeAction {
     private ChatClient chatClient;
     @Override
     public Map<String, Object> apply(OverAllState state) throws Exception {
-        String word = state.value("word","");
+        String word = state.value(Constant.NODE_INPUT,"");
         PromptTemplate promptTemplate = new PromptTemplate("你负责英语造句"+
                 "根据给定的单词{word}造句,返回一个英文句子");
         promptTemplate.add("word", word);
-        String result = chat(promptTemplate.render());
+
+        String result = this.chat(promptTemplate.render());
         return Map.of("sentence", result != null ? result : "null");
     }
     public String chat(String word) {

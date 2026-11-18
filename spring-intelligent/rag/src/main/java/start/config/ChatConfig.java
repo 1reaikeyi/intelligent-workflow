@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ChatConfiguratioon {
+public class ChatConfig {
     @Value("${tj.ai.memory.maxMessage:100}")
     private int maxMessages;
 

@@ -19,7 +19,7 @@ import java.net.UnknownHostException;
 //主程序入口
 @SpringBootApplication
 // 扫描bean组件
-@ComponentScan(basePackages = {"service","mapper","controller","start"})
+@ComponentScan(basePackages = {"service","mapper","controller","start","mybatis"})
 // 扫描mapper接口
 @MapperScan(basePackages = {"mapper"})
 // 开启事务管理

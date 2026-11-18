@@ -1,0 +1,31 @@
+# Spring配置
+server:
+  port: 8080
+
+spring:
+  ai:
+    dashscope:
+      base-url: https://dashscope.aliyuncs.com
+      api-key: ${PATH_ai_aliyun_api}
+      chat:
+        options:
+          model: qwen3.8-flash
+      embedding:
+        options:
+          model: qwen3.7-text-embedding-flash
+          dimensions: 1024
+
+  application:
+    name: qwen
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 10MB
+  config:
+    import: classpath:mysql.yaml,classpath:mysql-dev.yaml
+
+# 图片上传限制
+image:
+  max-width:2048
+  max-height:2048
+
