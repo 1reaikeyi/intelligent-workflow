@@ -17,6 +17,16 @@ spring:
           model: qwen3.8-flash
           max-tokens: 1024        # 限制输出，避免无限思考
           enable-thinking: false  # 识图场景一般不需要思考链
+#      embedding:
+        # 文本向量
+#        embeddings-path: /api/v1/services/embeddings/text-embedding/text-embedding
+        # 图片向量
+#        multimodal:
+#          multimodal-path: /api/v1/services/embeddings/multimodal-embedding/multimodal-embedding
+#        options:
+#          model: text-embedding-v3
+        
+       
 
   application:
     name: qwen
