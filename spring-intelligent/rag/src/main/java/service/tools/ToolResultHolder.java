@@ -7,12 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 工具结果保持器，用来存储tools中得到的结果，请求id 作为key， value为键值对数据
- *
- * @author zzj
- * @version 1.0
- */
+
 public class ToolResultHolder {
 
     private static final Map<String, Map<String, Object>> HANDLER_MAP = new ConcurrentHashMap<>();
@@ -29,9 +24,6 @@ public class ToolResultHolder {
     result	requestId 字符串	                    本次请求的 UUID
     */
 
-    /**
-     * 工具类，禁止实例化
-     */
     private ToolResultHolder() {
     }
 

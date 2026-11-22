@@ -1,4 +1,4 @@
-package service.node1;
+package service.node1.node;
 
 import com.alibaba.cloud.ai.dashscope.audio.tts.DashScopeAudioSpeechModel;
 import com.alibaba.cloud.ai.graph.OverAllState;
@@ -7,6 +7,7 @@ import org.springframework.ai.audio.tts.TextToSpeechPrompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import service.node1.Constant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,33 +18,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 @Component
-public class Read implements NodeAction {
+public class ReadNode implements NodeAction {
     @Autowired
     private DashScopeAudioSpeechModel dashScopeAudioSpeechModel;
 
     private static String path = "D:\\a.github\\intelligent-workflow\\spring-intelligent\\audio\\mp3";
 
     @Override
-    public Map<String, Object> apply(OverAllState state) throws Exception {
-        String text = state.value("sentence","") +
-                state.value("translation","");
+    public Map<String, Object> apply(OverAllState state) throws IOException {
+        String text = state.value(Constant.story,"");
         byte[] audio = chat(text);
-
-        // 2. 保存音频文件到本地
-        String fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".mp3";
-        File dir = new File(path);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        File path = new File(dir.getAbsolutePath(), fileName);
-        try (OutputStream outputStream = new FileOutputStream(path)) {
-            outputStream.write(audio);
-            outputStream.flush();
-        } catch (IOException e) {
-            throw new IOException("音频文件保存失败", e);
-        }
-        return Map.of("read", path.getAbsolutePath());
+        String fileName = save(audio);
+        return Map.of(
+                Constant.read, fileName
+        );
     }
 
     public byte[] chat(String text){
@@ -57,5 +45,21 @@ public class Read implements NodeAction {
                     chunks.forEach(baos::writeBytes);
                     return baos.toByteArray();
                 }).block();
+    }
+    public String save(byte[] audio) throws IOException {
+        String fileName = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")) + ".mp3";
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        File path = new File(dir.getAbsolutePath(), fileName);
+        try (OutputStream outputStream = new FileOutputStream(path)) {
+            outputStream.write(audio);
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new IOException("音频文件保存失败", e);
+        }
+        return fileName + path;
     }
 }

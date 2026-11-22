@@ -12,28 +12,17 @@
     <img src="https://img.shields.io/badge/Spring%20AI-1.1.+ -6DB33F?style=flat-square&logo=spring&logoColor=white" alt="spring ai" />
     <img src="https://img.shields.io/badge/Vue-Node.js20.+ -6DB33F?style=flat-square&logo=vuedotjs&logoColor=white" alt="vue" />
 </div>
-
-------
-
-## 
-
-| 模块                 | 核心功能                                                     | 技术要点                            |
-| :------------------- | :----------------------------------------------------------- | :---------------------------------- |
-| see和yu              | 敏感词过滤→图像识别→多节点                                   | spring-ai-alibaba-starter-dashscope |
-| rag                  | Agent 智能体路由、RAG 检索、function calling工具调用、会话管理、流式输出中断 | spring-ai-starter-openai            |
-| mcp-client+mcp-serve | mcp注册和使用                                                | spring-ai-alibaba-starter-dashscope |
-
 ---
 
 # 前端说明
 
-| 多模态 | <img src="说明/原型设计/1.png" alt="封面" style="zoom:50%;" /> |
-| ------ | ------------------------------------------------------------ |
-|        |                                                              |
+| 多模态 | <img src="说明/1.png" alt="封面" style="zoom:50%;" /> |
+| ------ | ----------------------------------------------------- |
+|        |                                                       |
 
 # 后端说明
 
-## 一、智能体路由 RAG 模块
+## 一、RAG 
 
 ## model
 
@@ -139,11 +128,11 @@ flowchart TD
 - Redis 会话缓存查询耗时稳定 < 5ms；
 - 单服务实例稳定支撑并发流式对话 200+，无阻塞堆积。
 
-## 二、多模态
+## 二、多节点智能体
 
 ## model
 
-see
+1see
 
 ```mermaid
 %%{init: {'theme':'neutral','themeVariables':{'fontSize':'8px','nodeBorder':'2px'},'flowchart':{'nodeSpacing':8,'rankSpacing':32,'useMaxWidth':false,'curve':'basis'}}}%%
@@ -192,19 +181,9 @@ flowchart TD
     ST --> S5 --> End
 ```
 
-language
+2audio
 
-```
-用户输入英文单词 → EnlishController → 注入单词至StateGraph全局state
-StateGraph异步串行节点编排：
-START → node1 Sentence造句节点
-    读取state.word，调用LLM生成英文例句，写入state.sentence
-→ node2 Translation翻译节点
-    读取state.sentence，LLM翻译中文，写入state.translation
-→ node3 Read语音合成节点
-    拼接sentence+translation文本，流式TTS生成音频byte[]，保存本地mp3文件，写入state.read音频路径
-→ END，返回完整state三部分数据给前端
-```
+<img src="说明/circulate.png" alt="循环节点" style="zoom:50%;" />
 
 ## 流程结果
 
@@ -214,13 +193,6 @@ START → node1 Sentence造句节点
 |      输入文本存在敏感违规内容      |        提问附带涉敏文字，送入大模型输出违规内容        | 全局拦截器 SensitiveWordBs 预处理参数，命中敏感词直接拦截返回 | Web 层前置拦截，无需进入 AI 业务逻辑，减少 token 消耗，满足内容安全规范 |
 | 多步骤识别查询逻辑硬编码，难以维护 | 识别、工具查询顺序固定，新增过滤、翻译步骤需要大量改动 | DashScope StateGraph 节点化编排，异步节点 + 有向边配置流程，支持条件分支扩展 | 流程可视化、插拔式节点，新增能力仅新增 NodeAction 实现，无需改动主调用代码 |
 |   图片二进制跨节点传递路径不兼容   |      本地文件路径容器间无法共享，直接传文件易丢失      | 全局统一 Base64 编码在 State 状态内流转，纯文本字符串无环境依赖 | Base64 是多模态 LLM 标准入参格式，跨节点序列化无丢失，适配分布式场景 |
-
-|              业务难点              |                     业务场景                     |                           解决方案                           |                           选型理由                           |
-| :--------------------------------: | :----------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| 多步骤强依赖任务代码耦合，不易扩展 |   造句、翻译、语音顺序绑定，新增步骤改动主逻辑   | StateGraph 节点化编排，有向边控制依赖顺序，状态统一传递数据  | 节点完全解耦，仅依赖全局 State 上下文，调整流程仅修改 Graph 配置，无需业务代码重构 |
-|    TTS 长文本一次性生成内存溢出    |       长英文段落合成，全量加载音频至堆内存       | 使用 stream 流式分块获取 byte，循环写入输出流，不缓存完整音频 |     流式分块降低内存峰值，适配超长文本语音合成，避免 OOM     |
-| 各步骤之间参数手动传递，样板代码多 |  造句结果需要手动传给翻译方法，多层入参传递冗余  | OverAllState 全局容器存储所有中间结果，节点只读对应 key，无手动传参 |        统一上下文流转，消除多层方法参数传递，简化代码        |
-|     音频文件重名覆盖、磁盘堆积     | 相同单词重复生成音频，旧文件被覆盖，磁盘文件杂乱 |   时间戳格式化文件名，统一 mp3 目录存放，定时清理过期音频    | UUID / 时间戳全局唯一，不会覆盖历史音频，目录统一便于运维清理 |
 
 **优化迭代**
 

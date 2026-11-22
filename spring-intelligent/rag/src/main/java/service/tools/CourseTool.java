@@ -1,5 +1,7 @@
 package service.tools;
 
+import constants.ToolDescriptionConstant;
+import constants.ToolParamConstant;
 import lombok.extern.slf4j.Slf4j;
 import model.bo.CourseBO;
 import constants.Constant;
@@ -16,10 +18,9 @@ import java.util.Optional;
 public class CourseTool {
     @Autowired
     private  CourseService courseService;
-    private static final String FIELD_NAME_FORMAT = "{}_{}";  // 提取格式字符串常量
 
-    @Tool(description = Constant.Tools.QUERY_COURSE_BY_ID)
-    public CourseBO queryCourseById(@ToolParam(description = Constant.ToolParams.COURSE_ID) Long courseId, ToolContext toolContext) {
+    @Tool(description = ToolDescriptionConstant.QUERY_COURSE_BY_ID)
+    public CourseBO queryCourseById(@ToolParam(description = ToolParamConstant.COURSE_ID) Long courseId, ToolContext toolContext) {
         return Optional.ofNullable(courseId)
                 .map(id -> courseService.getById(id))
                 .map(CourseBO::of)

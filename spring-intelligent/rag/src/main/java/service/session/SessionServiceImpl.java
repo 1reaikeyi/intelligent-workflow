@@ -22,7 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import service.chat.ChatService;
-import service.memory.AssistantMessageUtil;
+import service.memory.AssistantMessageBO;
 import service.memory.mysql.ChatRecordService;
 
 import java.time.LocalDateTime;
@@ -79,11 +79,11 @@ public class SessionServiceImpl extends ServiceImpl<SessionMapper, Session> impl
                 // 过滤掉非用户消息和助手消息
                 .filter(message -> message.getMessageType() == MessageType.ASSISTANT || message.getMessageType() == MessageType.USER)
                 .map(message -> {
-                    if (message instanceof AssistantMessageUtil) {
+                    if (message instanceof AssistantMessageBO) {
                         return MessageVO.builder()
                                 .content(message.getText())
                                 .type(MessageTypeEnum.valueOf(message.getMessageType().name()))
-                                .params(((AssistantMessageUtil) message).getParams())
+                                .params(((AssistantMessageBO) message).getParams())
                                 .build();
                     }
                     //if (message instanceof USERMessageUtil) {}

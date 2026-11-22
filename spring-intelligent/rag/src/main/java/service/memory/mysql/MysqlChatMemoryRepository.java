@@ -2,7 +2,6 @@ package service.memory.mysql;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import model.entity.ChatRecord;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.messages.Message;

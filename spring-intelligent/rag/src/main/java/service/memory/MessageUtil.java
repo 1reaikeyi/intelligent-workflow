@@ -9,19 +9,12 @@ import org.springframework.ai.chat.messages.*;
 import service.tools.ToolResultHolder;
 
 /**
- * 消息转换工具类，提供消息对象与JSON字符串之间的转换功能，主要用于Redis存储格式转换
+ * 消息转换工具类，提供消息对象与JSON字符串之间的转换功能
  */
 public class MessageUtil {
 
-    /**
-     * 将Message对象转换为Redis存储格式的JSON字符串
-     *
-     * @param message 需要转换的原始消息对象
-     * @param sessionId 会话ID
-     * @return 符合Redis存储规范的JSON字符串
-     */
     public static String toJson(Message message, String sessionId) {
-        var myMessage = BeanUtil.toBean(message, MessageModel.class);
+        var myMessage = BeanUtil.toBean(message, MessageBO.class);
         // 设置消息内容
         myMessage.setTextContent(message.getText());
         myMessage.setSessionId(sessionId);
@@ -45,15 +38,8 @@ public class MessageUtil {
         return JSONUtil.toJsonStr(myMessage);
     }
 
-    /**
-     * 将Redis存储的JSON字符串反序列化为对应的Message对象
-     *
-     * @param json Redis存储的JSON格式消息数据
-     * @return 对应类型的Message对象
-     * @throws RuntimeException 当无法识别的消息类型时抛出异常
-     */
     public static Message toMessage(String json) {
-        var myMessage = JSONUtil.toBean(json, MessageModel.class);
+        var myMessage = JSONUtil.toBean(json, MessageBO.class);
         var messageType = MessageType.valueOf(myMessage.getMessageType());
         switch (messageType) {
             case SYSTEM -> {
@@ -67,19 +53,13 @@ public class MessageUtil {
                         .build();
             }
             case ASSISTANT -> {
-                return new AssistantMessageUtil(myMessage.getTextContent(),
+                return new AssistantMessageBO(
+                        myMessage.getTextContent(),
                         myMessage.getMetadata(),
                         myMessage.getToolCalls(),
                         myMessage.getMedia(),
                         myMessage.getParams());
             }
-//            case ASSISTANT -> {
-//                return AssistantMessage.builder()
-//                        .content(myMessage.getTextContent())
-//                        .properties(myMessage.getMetadata())
-//                        .toolCalls(myMessage.getToolCalls())
-//                        .build();
-//            }
             case TOOL -> {
                 return ToolResponseMessage.builder()
                         .responses(myMessage.getToolResponses())
@@ -91,6 +71,11 @@ public class MessageUtil {
         throw new RuntimeException("Message data conversion failed.");
     }
 
-
+/**
+ * ● AssistantMessage 		大模型生成的消息
+ * ● SystemMessage  		系统消息
+ * ● ToolResponseMessage	工具响应消息
+ * ● UserMessage  		用户消息
+ */
 
 }

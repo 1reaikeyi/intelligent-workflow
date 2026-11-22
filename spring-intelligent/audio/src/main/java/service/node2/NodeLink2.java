@@ -32,7 +32,7 @@ public class NodeLink2 {
         //节点
         try {
             graph.addNode("node1", AsyncNodeAction.node_async(visualNode));
-            graph.addNode("service/node2", AsyncNodeAction.node_async(toolNode));
+            graph.addNode("node2", AsyncNodeAction.node_async(toolNode));
         } catch (GraphStateException e) {
             throw new RuntimeException(e);
         }
@@ -40,7 +40,7 @@ public class NodeLink2 {
         try {
             graph.addEdge(StateGraph.START,"node1");
             graph.addEdge("node1", "service/node2");
-            graph.addEdge("service/node2",StateGraph.END);
+            graph.addEdge("node2",StateGraph.END);
         } catch (GraphStateException e) {
             throw new RuntimeException(e);
         }

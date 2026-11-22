@@ -17,10 +17,10 @@ public class ChatController {
     }
 
     /**
-     * 测试示例：GET /chat?q=请调用getWeather工具查询城市101010100的天气
+     * 测试示例：GET /chat?question=请调用getWeather工具查询城市101010100的天气
      */
     @GetMapping
-    public String chat(@RequestParam("q") String q) {
-        return chatClient.prompt().user(q).call().content();
+    public String chat(@RequestParam("question") String question) {
+        return chatClient.prompt().user(question).call().content();
     }
 }

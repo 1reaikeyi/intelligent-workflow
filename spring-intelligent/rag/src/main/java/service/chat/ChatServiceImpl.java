@@ -63,10 +63,10 @@ public class ChatServiceImpl implements ChatService {
                 // 第一次输出内容时执行
                 // 出现异常时，删除标识
                 // 完成时执行，删除标识
+                //stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doFirst(() -> outputHash.put(sessionId, "true"))  // 将布尔值转换为字符串存入 Redis
                 .doOnError(throwable -> outputHash.delete(sessionId))
                 .doOnComplete(() -> outputHash.delete(sessionId))
-                //(2)stop时仍然输出，当输出被取消时，保存输出的内容到历史记录中
                 .doOnCancel(() -> {
                     this.saveStopHistoryRecord(conversationId, outputBuilder.toString());
                 })
@@ -83,9 +83,7 @@ public class ChatServiceImpl implements ChatService {
                             .build();
                     return chatEventVO;})
 
-                .concatWith(Flux.just(ChatEventVO.builder().
-                        eventType(ChatEventTypeEnum.STOP.getValue())
-                        .build()));
+                .concatWith(Flux.just(ChatEventVO.builder().eventType(ChatEventTypeEnum.STOP.getValue()).build()));
     }
     /**
      * 保存停止输出的记录
