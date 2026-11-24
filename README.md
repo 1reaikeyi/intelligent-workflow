@@ -1,17 +1,20 @@
 <div align="center">
-  <h1>Intelligent-workflow - 智能 ，工作流</h1>
-  <h5>Spring Boot 3 + Spring AI Alibaba + DashScope StateGraph的Agent 智能体、视觉识别、语音工作流三大核心域。AI 助手后端平台，基于RAG 检索增强 + StateGraph 可视化工作流，具有文本对话、知识库问答、工具函数调用、图像视觉识别、多节点编排、ASR 语音转写 / TTS 语音合成多模态能力，会话中断停止、会话存储用于后期分析<h5> 
+  <h1>Intelligent-workflow，智能体</h1>
+  <h5>Spring cloud + Spring AI Alibaba的Agent 智能体，AI 助手后端平台。<h5> 
 </div>
+
 ## 配置要求
 
 <div align="center">
  <img src="https://img.shields.io/badge/Java-17+ -6DB33F?style=flat-square&logo=java&logoColor=white" alt="Java" />
+    <img src="https://img.shields.io/badge/spring cloud-2025+ -6DB33F?style=flat-square&logo=cloud &logoColor=white" alt="cloud" />
     <img src="https://img.shields.io/badge/Spring%20Boot-3.+ -6DB33F?style=flat-square&logo=springboot&logoColor=white" alt="Spring Boot" />
     <img src="https://img.shields.io/badge/MySQL-8.0+ -6DB33F?style=flat-square&logo=mysql&logoColor=white" alt="mysql" />
     <img src="https://img.shields.io/badge/Redis-7.0+ -6DB33F?style=flat-square&logo=redis&logoColor=white" alt="redis" />
     <img src="https://img.shields.io/badge/Spring%20AI-1.1.+ -6DB33F?style=flat-square&logo=spring&logoColor=white" alt="spring ai" />
     <img src="https://img.shields.io/badge/Vue-Node.js20.+ -6DB33F?style=flat-square&logo=vuedotjs&logoColor=white" alt="vue" />
 </div>
+
 ---
 
 # 前端说明
