@@ -7,7 +7,8 @@ package com.branch.exception;
  * @date 2023/2/14 9:37
  */
 public class ValidationGroups {
- public interface Inster{};
- public interface Update{};
- public interface Delete{};
+   public interface Insert{};
+   public interface Update{};
+   public interface Delete{};
+
 }

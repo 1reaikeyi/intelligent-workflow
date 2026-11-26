@@ -6,14 +6,27 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="intelligent-rag-api" />
+        <module name="intelligent-manage-api" />
+        <module name="mcp-serve" />
         <module name="intelligent-base" />
         <module name="intelligent-visual-api" />
         <module name="intelligent-rag-service" />
         <module name="intelligent-visual-model" />
         <module name="intelligent-visual-service" />
         <module name="intelligent-rag-model" />
+        <module name="intelligent-rag-api" />
+        <module name="intelligent-manage-service" />
+        <module name="mcp-client" />
+        <module name="yu" />
+        <module name="intelligent-manage-model" />
       </profile>
     </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="mcp-client" options="-parameters" />
+      <module name="mcp-serve" options="-parameters" />
+      <module name="yu" options="-parameters" />
+    </option>
   </component>
 </project>

@@ -1,0 +1,52 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  application:
+    name: rag.api #服务名content-manage.api-dev.yaml
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://192.168.80.128:3306/use_session
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: {MYSQL_PASSWORD}
+  data:
+    redis:
+      host: 192.168.80.128
+      port: 6379
+      password: {MYSQL_PASSWORD}
+      database: 1
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${PATH_ai_aliyun_api}
+      chat:
+        options:
+          model: qwen3.8-flash
+      embedding:
+        options:
+          model: qwen3.7-text-embedding
+          dimensions: 1024
+          encoding-format: float
+    vectorstore:
+      redis:
+        initialize-schema: true
+        index-name: spring-ai-index
+        prefix: "embedding"
+chat:
+  ai:
+    prompt:
+      system:
+        chat:
+          file: classpath:system-message.txt
+
+# MyBatis-Plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:mapper/**/*.xml
+

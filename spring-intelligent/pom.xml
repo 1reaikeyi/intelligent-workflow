@@ -12,6 +12,7 @@
         <module>intelligent-base</module>
         <module>rag</module>
         <module>visual</module>
+        <module>manage</module>
     </modules>
 
     <properties>
@@ -106,7 +107,7 @@
 <!--            &lt;!&ndash; JJWT Jackson 序列化（支持 JSON 解析，适配 Spring Boot 3 的 Jackson 版本） &ndash;&gt;-->
 <!--            <dependency>-->
 <!--                <groupId>io.jsonwebtoken</groupId>-->
-<!--                <artifactId>jjwt-api</artifactId>-->
+<!--                <artifactId>jjwt-manage.api</artifactId>-->
 <!--                <version>0.12.6</version>-->
 <!--            </dependency>-->
 <!--            <dependency>-->
@@ -133,7 +134,7 @@
 <!--            &lt;!&ndash; json 解析(springboot自带) &ndash;&gt;-->
 <!--            <dependency>-->
 <!--                <groupId>jakarta.xml.bind</groupId>-->
-<!--                <artifactId>jakarta.xml.bind-api</artifactId>-->
+<!--                <artifactId>jakarta.xml.bind-manage.api</artifactId>-->
 <!--                <version>4.0.2</version>-->
 <!--            </dependency>-->
 <!--            &lt;!&ndash; 敏感词 &ndash;&gt;-->

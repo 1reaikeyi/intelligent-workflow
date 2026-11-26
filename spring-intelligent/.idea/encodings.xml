@@ -5,6 +5,16 @@
     <file url="file://$PROJECT_DIR$/intelligent-base/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/intelligent-visual/intelligent-visual-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/intelligent-visual/intelligent-visual-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-model/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-model/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/intelligent-manage-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/manage/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp-serve/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rag/intelligent-rag-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rag/intelligent-rag-api/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rag/intelligent-rag-model/src/main/java" charset="UTF-8" />
@@ -23,5 +33,6 @@
     <file url="file://$PROJECT_DIR$/visual/intelligent-visual-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/visual/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/visual/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/yu/src/main/java" charset="UTF-8" />
   </component>
 </project>
